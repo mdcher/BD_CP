@@ -2,9 +2,13 @@ import { Router } from 'express';
 import { BookController } from '../../controllers/BookController';
 import { checkJwt } from '../../middleware/checkJwt';
 import { checkRole } from '../../middleware/checkRole';
+import { setDatabaseRole } from '../../middleware/setDatabaseRole';
 import { UserRole } from '../../orm/entities/User'; // Використовуємо наш enum з User.ts
 
 const bookRouter = Router();
+
+// ВАЖЛИВО: Застосовуємо setDatabaseRole до всіх маршрутів для RLS
+bookRouter.use(setDatabaseRole);
 
 // Публічний ендпоінт для перегляду всіх книг
 bookRouter.get('/', BookController.getAll);

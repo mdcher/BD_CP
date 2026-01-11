@@ -41,4 +41,25 @@ export const ReportController = {
       next(err);
     }
   },
+
+  // Статистика читання
+  getReadingStatistics: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const data = await ReportService.getReadingStatistics();
+      res.customSuccess(200, 'Reading statistics.', data);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // Топ читачів
+  getTopReaders: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const limit = req.query.limit ? Number(req.query.limit) : 10;
+      const data = await ReportService.getTopReaders(limit);
+      res.customSuccess(200, 'Top readers.', data);
+    } catch (err) {
+      next(err);
+    }
+  },
 };

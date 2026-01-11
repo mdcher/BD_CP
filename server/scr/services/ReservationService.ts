@@ -14,7 +14,7 @@ export const ReservationService = {
     // Встановлюємо, що книгу треба забрати протягом 2 днів
     const query = `
       INSERT INTO public.reservations (bookid, userid, reservationdate, pickupdate, status)
-      VALUES ($1, $2, CURRENT_DATE, CURRENT_DATE + INTERVAL '2 day', 'Active')
+      VALUES ($1::integer, $2::integer, CURRENT_DATE, CURRENT_DATE + INTERVAL '2 day', 'Active')
       RETURNING reservationid, pickupdate;
     `;
     try {
@@ -26,11 +26,11 @@ export const ReservationService = {
     }
   },
 
-  // Отримати всі бронювання конкретного користувача
-  getByUser: async (userId: number) => {
+  // Отримати всі бронювання поточного користувача (через RLS)
+  getByUser: async () => {
     const connection = getConnection();
-    const query = `SELECT * FROM public.reservations WHERE userid = $1 ORDER BY reservationdate DESC;`;
-    return await connection.query(query, [userId]);
+    const query = `SELECT * FROM v_reader_reservations ORDER BY reservationdate DESC;`;
+    return await connection.query(query);
   },
 
   // Скасувати бронювання
@@ -38,9 +38,9 @@ export const ReservationService = {
     const connection = getConnection();
     // RLS політика в базі даних не дозволить користувачу скасувати чуже бронювання
     const query = `
-      UPDATE public.reservations 
-      SET status = 'Cancelled' 
-      WHERE reservationid = $1 AND userid = $2 AND status = 'Active'
+      UPDATE public.reservations
+      SET status = 'Cancelled'
+      WHERE reservationid = $1::integer AND userid = $2::integer AND status = 'Active'
       RETURNING reservationid;
     `;
     const result = await connection.query(query, [reservationId, userId]);
@@ -48,5 +48,28 @@ export const ReservationService = {
         throw new CustomError(404, 'General', 'Active reservation not found or you do not have permission to cancel it.');
     }
     return { reservationId, status: 'Cancelled' };
+  },
+
+  // Завершити бронювання (для бібліотекарів - коли користувач забрав книгу)
+  complete: async (reservationId: number) => {
+    const connection = getConnection();
+    const query = `
+      UPDATE public.reservations
+      SET status = 'Completed'
+      WHERE reservationid = $1::integer AND status = 'Active'
+      RETURNING reservationid, userid, bookid;
+    `;
+    const result = await connection.query(query, [reservationId]);
+    if (result[1] === 0) {
+      throw new CustomError(404, 'General', 'Active reservation not found.');
+    }
+    return result[0];
+  },
+
+  // Отримати всі активні бронювання (для бібліотекарів)
+  getAllActive: async () => {
+    const connection = getConnection();
+    const query = `SELECT * FROM v_all_active_reservations ORDER BY pickupdate ASC;`;
+    return await connection.query(query);
   },
 };

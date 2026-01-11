@@ -583,6 +583,105 @@ WITH book_loan_stats AS (
 )
 SELECT title, genrename, loan_count FROM book_loan_stats WHERE rank_in_genre = 1;
 
+-- View: Всі користувачі для адміністратора
+CREATE VIEW public.v_all_users_for_admin AS
+SELECT
+    u.userid,
+    u.fullname,
+    u.role,
+    u.dateofbirth,
+    u.contactinfo,
+    u.violationcount,
+    u.isblocked,
+    COUNT(l.loanid) FILTER (WHERE l.isreturned = false) as active_loans,
+    COUNT(f.fineid) FILTER (WHERE f.ispaid = false) as unpaid_fines
+FROM public.users u
+         LEFT JOIN public.loans l ON u.userid = l.userid
+         LEFT JOIN public.fines f ON u.userid = f.userid
+GROUP BY u.userid;
+
+-- View: Неоплачені штрафи читача
+CREATE VIEW public.v_reader_unpaid_fines AS
+SELECT
+    f.fineid,
+    f.userid,
+    f.issuedate,
+    f.amount,
+    vt.name as violation_type,
+    vt.cost as base_cost
+FROM public.fines f
+         JOIN public.violation_types vt ON f.typeid = vt.typeid
+         JOIN public.users u ON f.userid = u.userid
+WHERE f.ispaid = false
+  AND u.db_user = CURRENT_USER;
+
+-- View: Всі штрафи
+CREATE VIEW public.v_all_fines AS
+SELECT
+    f.fineid,
+    f.userid,
+    u.fullname,
+    u.contactinfo,
+    f.issuedate,
+    f.paiddate,
+    f.ispaid,
+    f.amount,
+    vt.name as violation_type
+FROM public.fines f
+         JOIN public.users u ON f.userid = u.userid
+         JOIN public.violation_types vt ON f.typeid = vt.typeid;
+
+-- View: Видачі читача
+CREATE VIEW public.v_reader_loans AS
+SELECT
+    l.loanid,
+    l.bookid,
+    b.title as book_title,
+    l.issuedate,
+    l.duedate,
+    l.returndate,
+    l.isreturned,
+    CASE
+        WHEN l.isreturned = false AND l.duedate < CURRENT_DATE THEN 'Overdue'
+        WHEN l.isreturned = false THEN 'Active'
+        ELSE 'Returned'
+        END as loan_status
+FROM public.loans l
+         JOIN public.books b ON l.bookid = b.bookid
+         JOIN public.users u ON l.userid = u.userid
+WHERE u.db_user = CURRENT_USER;
+
+-- View: Резервації читача
+CREATE VIEW public.v_reader_reservations AS
+SELECT
+    r.reservationid,
+    r.bookid,
+    b.title as book_title,
+    r.reservationdate,
+    r.pickupdate,
+    r.status
+FROM public.reservations r
+         JOIN public.books b ON r.bookid = b.bookid
+         JOIN public.users u ON r.userid = u.userid
+WHERE u.db_user = CURRENT_USER;
+
+-- View: Всі активні резервації
+CREATE VIEW public.v_all_active_reservations AS
+SELECT
+    r.reservationid,
+    r.bookid,
+    b.title as book_title,
+    r.userid,
+    u.fullname as user_name,
+    u.contactinfo,
+    r.reservationdate,
+    r.pickupdate,
+    r.status
+FROM public.reservations r
+         JOIN public.books b ON r.bookid = b.bookid
+         JOIN public.users u ON r.userid = u.userid
+WHERE r.status = 'Active';
+
 -- 7. Завантаження даних (COPY)
 
 COPY public.authors (authorid, fullname) FROM stdin;
@@ -888,6 +987,9 @@ ALTER TABLE public.loans ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.fines ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.reservations ENABLE ROW LEVEL SECURITY;
 
+-- Дозволяємо SELECT для автентифікації (логін) - доступ по contactinfo для перевірки пароля
+CREATE POLICY allow_login_select ON public.users FOR SELECT USING (true);
+
 CREATE POLICY admin_lib_view_all_users ON public.users TO role_librarian, role_admin USING (true);
 CREATE POLICY reader_view_self ON public.users FOR SELECT TO role_reader USING ((db_user = CURRENT_USER));
 
@@ -915,3 +1017,26 @@ GRANT SELECT ON public.employees, public.orders, public.order_items TO role_acco
 -- Sequences
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO role_admin, role_librarian;
 GRANT USAGE, SELECT ON public.reservations_reservationid_seq TO role_reader;
+
+-- Views (явні права для RLS-захищених views)
+GRANT SELECT ON public.v_all_users_for_admin TO role_admin;
+GRANT SELECT ON public.v_reader_unpaid_fines TO role_reader;
+GRANT SELECT ON public.v_all_fines TO role_admin, role_accountant;
+GRANT SELECT ON public.v_reader_loans TO role_reader;
+GRANT SELECT ON public.v_reader_reservations TO role_reader;
+GRANT SELECT ON public.v_all_active_reservations TO role_librarian, role_admin;
+
+-- 13. Дозвіл основному користувачу бекенду переключатися між ролями (для RLS)
+-- ВАЖЛИВО: Замініть 'postgres' на ім'я користувача з вашого .env (DB_USERNAME)
+-- Якщо ваш користувач вже є суперкористувачем, ці команди не обов'язкові
+DO $$
+BEGIN
+    -- Перевіряємо, чи існує користувач postgres (або ваш DB_USERNAME)
+    IF EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'postgres') THEN
+        GRANT role_guest TO postgres;
+        GRANT role_reader TO postgres;
+        GRANT role_librarian TO postgres;
+        GRANT role_accountant TO postgres;
+        GRANT role_admin TO postgres;
+    END IF;
+END $$;

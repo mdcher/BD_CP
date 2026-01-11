@@ -13,7 +13,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     
     const connection = getConnection();
     await connection.query(
-      `CALL public.create_user($1, $2, $3, $4, $5)`,
+      `CALL public.create_user($1::varchar, $2::varchar, $3::varchar, $4::date, $5::public.role)`,
       [fullName, contactInfo, hashedPassword, dateOfBirth, role || 'Reader']
     );
 

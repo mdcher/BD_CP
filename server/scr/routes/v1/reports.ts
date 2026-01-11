@@ -34,4 +34,18 @@ reportRouter.get(
   ReportController.getGenrePopularity
 );
 
+// Статистика читання (для персоналу)
+reportRouter.get(
+  '/reading-statistics',
+  [checkJwt, checkRole([UserRole.Admin, UserRole.Librarian])],
+  ReportController.getReadingStatistics
+);
+
+// Топ читачів (для персоналу)
+reportRouter.get(
+  '/top-readers',
+  [checkJwt, checkRole([UserRole.Admin, UserRole.Librarian])],
+  ReportController.getTopReaders
+);
+
 export default reportRouter;

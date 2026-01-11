@@ -21,8 +21,8 @@ export const BookService = {
 
   getOne: async (id: number) => {
     const connection = getConnection();
-    // ВИПРАВЛЕНО: назва колонки lowercase
-    const res = await connection.query('SELECT * FROM view_catalog_extended WHERE bookid = $1', [id]);
+    // ВИПРАВЛЕНО: назва колонки lowercase з явним приведенням типу
+    const res = await connection.query('SELECT * FROM public.view_catalog_extended WHERE bookid = $1::integer', [id]);
     return res[0];
   },
 

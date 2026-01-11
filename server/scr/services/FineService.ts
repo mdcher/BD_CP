@@ -2,32 +2,28 @@ import { getConnection } from 'typeorm';
 import { CustomError } from '../utils/response/custom-error/CustomError';
 
 export const FineService = {
-  // Отримати всі неоплачені штрафи користувача
-  getMyUnpaid: async (userId: number) => {
+  // Отримати всі неоплачені штрафи користувача (через RLS)
+  getMyUnpaid: async () => {
     const connection = getConnection();
-    const query = `
-      SELECT f.fineid, f.amount, f.issuedate, vt.name as reason
-      FROM public.fines f
-      JOIN public.violation_types vt ON f.typeid = vt.typeid
-      WHERE f.userid = $1 AND f.ispaid = false
-      ORDER BY f.issuedate DESC;
-    `;
-    return await connection.query(query, [userId]);
+    const query = `SELECT * FROM v_reader_unpaid_fines ORDER BY issuedate DESC;`;
+    return await connection.query(query);
   },
-  
-  // Оплатити штраф (для Бухгалтера/Адміна)
-  payFine: async (fineId: number) => {
+
+  // Отримати всі штрафи (для Адмінів/Бухгалтерів)
+  getAll: async () => {
     const connection = getConnection();
-    const query = `
-      UPDATE public.fines
-      SET ispaid = true, paiddate = CURRENT_DATE
-      WHERE fineid = $1 AND ispaid = false
-      RETURNING fineid, paiddate;
-    `;
-    const result = await connection.query(query, [fineId]);
-    if (result[1] === 0) {
-      throw new CustomError(404, 'General', `Fine with ID ${fineId} not found or is already paid.`);
+    const query = `SELECT * FROM v_all_fines ORDER BY issuedate DESC;`;
+    return await connection.query(query);
+  },
+
+  // Оплатити штраф (для Бухгалтера/Адміна)
+  payFine: async (fineId: number, accountantId: number) => {
+    const connection = getConnection();
+    try {
+      await connection.query('CALL pay_fine($1::integer, $2::integer)', [fineId, accountantId]);
+      return { message: 'Fine paid successfully.' };
+    } catch (err: any) {
+      throw new CustomError(400, 'Raw', 'Pay fine failed', [err.message]);
     }
-    return result[0][0];
   },
 };

@@ -17,8 +17,7 @@ export const ReservationController = {
   // Отримати мої бронювання
   getMyReservations: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.jwtPayload.id;
-      const reservations = await ReservationService.getByUser(userId);
+      const reservations = await ReservationService.getByUser();
       res.customSuccess(200, 'Your reservations.', reservations);
     } catch (err) {
       next(err);
@@ -32,6 +31,27 @@ export const ReservationController = {
       const userId = req.jwtPayload.id;
       const cancelledReservation = await ReservationService.cancel(reservationId, userId);
       res.customSuccess(200, 'Reservation cancelled.', cancelledReservation);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // Завершити бронювання (для бібліотекарів)
+  complete: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const reservationId = Number(req.params.id);
+      const completedReservation = await ReservationService.complete(reservationId);
+      res.customSuccess(200, 'Reservation completed.', completedReservation);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // Отримати всі активні бронювання (для бібліотекарів)
+  getAllActive: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const reservations = await ReservationService.getAllActive();
+      res.customSuccess(200, 'All active reservations.', reservations);
     } catch (err) {
       next(err);
     }

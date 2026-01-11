@@ -5,8 +5,8 @@ export const UserService = {
   // Отримати список всіх користувачів (для адмінів/бібліотекарів)
   getAll: async () => {
     const connection = getConnection();
-    // Вибираємо тільки безпечні поля, не повертаємо хеш пароля
-    const query = `SELECT userid, fullname, role, dateofbirth, contactinfo, violationcount, isblocked FROM public.users;`;
+    // Логіка перенесена в SQL VIEW. RLS політики відфільтрують дані автоматично.
+    const query = `SELECT * FROM v_all_users_for_admin;`;
     return await connection.query(query);
   },
 
@@ -15,8 +15,8 @@ export const UserService = {
     const connection = getConnection();
     const query = `
       UPDATE public.users
-      SET isblocked = $1
-      WHERE userid = $2
+      SET isblocked = $1::boolean
+      WHERE userid = $2::integer
       RETURNING userid, fullname, isblocked;
     `;
     const result = await connection.query(query, [isBlocked, userId]);
@@ -24,5 +24,19 @@ export const UserService = {
       throw new CustomError(404, 'General', `User with ID ${userId} not found.`);
     }
     return result[0][0];
+  },
+
+  // Оновити дані користувача (роль, статус блокування)
+  updateUser: async (adminId: number, targetUserId: number, data: { role: string, isBlocked: boolean }) => {
+    const connection = getConnection();
+    try {
+      await connection.query(
+        `CALL update_user_by_admin($1::integer, $2::integer, $3::text, $4::boolean)`,
+        [adminId, targetUserId, data.role, data.isBlocked]
+      );
+      return { message: 'User updated successfully.' };
+    } catch (err: any) {
+      throw new CustomError(400, 'Raw', 'Update user failed', [err.message]);
+    }
   },
 };

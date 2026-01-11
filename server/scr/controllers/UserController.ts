@@ -33,4 +33,17 @@ export const UserController = {
       next(err);
     }
   },
+
+  // Оновити дані користувача (роль, статус блокування)
+  updateUser: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const adminId = req.jwtPayload.id;
+      const targetUserId = Number(req.params.id);
+      const { role, isBlocked } = req.body;
+      const result = await UserService.updateUser(adminId, targetUserId, { role, isBlocked });
+      res.customSuccess(200, 'User updated successfully.', result);
+    } catch (err) {
+      next(err);
+    }
+  },
 };
