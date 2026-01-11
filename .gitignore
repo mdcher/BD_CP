@@ -5,6 +5,7 @@ server/node_modules/
 .env
 client/.env
 server/.env
+server/config/.env
 
 dist/
 build/

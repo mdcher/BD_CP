@@ -11,14 +11,14 @@ function BooksPage(): React.JSX.Element {
 	// Безпечна фільтрація
 	const filteredBooks = books?.filter((book) => {
 		const query = searchQuery.toLowerCase();
-		const title = book.bookTitle.toLowerCase() || "";
+		// Безпечно обробляємо можливий null/undefined, перетворюючи назву в нижній регістр
+		const title = book.bookTitle?.toLowerCase() ?? "";
 		return title.includes(query);
 	});
 
-	const handleDelete = (id: string | number): void => {
+	const handleDelete = (id: string): void => {
 		if (window.confirm("Ви впевнені, що хочете видалити цю книгу?")) {
-			// Примусово перетворюємо ID в рядок, бо API чекає рядок
-			deleteBookMutation.mutate(String(id));
+			deleteBookMutation.mutate(id);
 		}
 	};
 
@@ -77,7 +77,7 @@ function BooksPage(): React.JSX.Element {
 				) : (
 					filteredBooks?.map((book) => (
 						<div
-							key={book.id}
+							key={String(book.id)}
 							className="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-900/5 transition-all hover:shadow-xl hover:ring-indigo-500/20 hover:-translate-y-1"
 						>
 							<div>
