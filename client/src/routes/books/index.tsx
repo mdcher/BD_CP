@@ -1,5 +1,6 @@
 import type * as React from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useAuthStore } from "@/store/authStore.ts";
 import { useBooks, useDeleteBook } from "@/features/books/booksApi.ts";
 import { useState } from "react";
 
@@ -7,18 +8,43 @@ function BooksPage(): React.JSX.Element {
 	const { data: books, isLoading, isError } = useBooks();
 	const deleteBookMutation = useDeleteBook();
 	const [searchQuery, setSearchQuery] = useState("");
+	const { isAuthenticated, user } = useAuthStore();
 
-	// Безпечна фільтрація
+	const isAdminOrLibrarian =
+		isAuthenticated && (user?.role === "Admin" || user?.role === "Librarian");
+	const isReader = isAuthenticated && user?.role === "Reader";
+
 	const filteredBooks = books?.filter((book) => {
 		const query = searchQuery.toLowerCase();
-		// Безпечно обробляємо можливий null/undefined, перетворюючи назву в нижній регістр
-		const title = book.bookTitle?.toLowerCase() ?? "";
-		return title.includes(query);
+		const title = book.title?.toLowerCase() ?? "";
+		const authors = book.authors?.toLowerCase() ?? "";
+		const genres = book.genres?.toLowerCase() ?? "";
+		const publisher = book.publisher?.toLowerCase() ?? "";
+		return (
+			title.includes(query) ||
+			authors.includes(query) ||
+			genres.includes(query) ||
+			publisher.includes(query)
+		);
 	});
 
 	const handleDelete = (id: string): void => {
 		if (window.confirm("Ви впевнені, що хочете видалити цю книгу?")) {
 			deleteBookMutation.mutate(id);
+		}
+	};
+
+	const handleReserve = async (bookId: number) => {
+		try {
+			await apiClient.post(
+				`/reservations`,
+				{ bookId },
+				{ headers: { Authorization: `Bearer ${useAuthStore.getState().token}` } },
+			);
+			alert("Book reserved successfully!");
+		} catch (error) {
+			console.error("Failed to reserve book:", error);
+			alert("Failed to reserve book.");
 		}
 	};
 
@@ -45,13 +71,14 @@ function BooksPage(): React.JSX.Element {
 					<h1 className="text-3xl font-bold text-slate-900">Бібліотека</h1>
 					<p className="text-slate-500">Ваша колекція книг</p>
 				</div>
-
-				<Link
-					className="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-all hover:bg-indigo-700 active:scale-95"
-					to="/books/create"
-				>
-					<span>➕</span> Додати книгу
-				</Link>
+				{isAdminOrLibrarian && (
+					<Link
+						className="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-all hover:bg-indigo-700 active:scale-95"
+						to="/books/create"
+					>
+						<span>➕</span> Додати книгу
+					</Link>
+				)}
 			</div>
 
 			<div className="relative">
@@ -77,7 +104,7 @@ function BooksPage(): React.JSX.Element {
 				) : (
 					filteredBooks?.map((book) => (
 						<div
-							key={String(book.id)}
+							key={book.bookid}
 							className="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-900/5 transition-all hover:shadow-xl hover:ring-indigo-500/20 hover:-translate-y-1"
 						>
 							<div>
@@ -92,9 +119,9 @@ function BooksPage(): React.JSX.Element {
 
 								<h3
 									className="mb-1 text-xl font-bold text-slate-900 line-clamp-1"
-									title={book.bookTitle}
+									title={book.title}
 								>
-									{book.bookTitle || "Без назви"}
+									{book.title || "Без назви"}
 								</h3>
 
 								<p className="mb-4 text-sm font-medium text-slate-500">
@@ -109,30 +136,50 @@ function BooksPage(): React.JSX.Element {
 										</span>
 									</div>
 									<div className="flex justify-between">
+										<span>Жанри:</span>
+										<span className="text-right font-semibold text-slate-700 line-clamp-1">
+											{book.genres}
+										</span>
+									</div>
+									<div className="flex justify-between">
 										<span>Статус:</span>
-										<span className="text-slate-700">
-											{book.status}
+										<span className="font-semibold text-slate-700">
+											{book.availabilitystatus}
 										</span>
 									</div>
 								</div>
 							</div>
 
 							<div className="flex gap-2 pt-2">
-								<Link
-									className="flex-1 rounded-lg border border-indigo-100 bg-indigo-50 py-2 text-center text-sm font-semibold text-indigo-600 transition-colors hover:bg-indigo-100 hover:text-indigo-700"
-									to="/books/$bookId"
-									params={{ bookId: String(book.id) }}
-								>
-									Редагувати
-								</Link>
-								<button
-									className="flex-1 rounded-lg border border-red-100 bg-red-50 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100 hover:text-red-700"
-									onClick={() => {
-										handleDelete(book.id);
-									}}
-								>
-									Видалити
-								</button>
+								{isAdminOrLibrarian && (
+									<>
+										<Link
+											className="flex-1 rounded-lg border border-indigo-100 bg-indigo-50 py-2 text-center text-sm font-semibold text-indigo-600 transition-colors hover:bg-indigo-100 hover:text-indigo-700"
+											to="/books/$bookId"
+											params={{ bookId: String(book.bookid) }}
+										>
+											Редагувати
+										</Link>
+										<button
+											className="flex-1 rounded-lg border border-red-100 bg-red-50 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100 hover:text-red-700"
+											onClick={() => {
+												handleDelete(String(book.bookid));
+											}}
+										>
+											Видалити
+										</button>
+									</>
+								)}
+								{isReader && book.availabilitystatus === "Available" && (
+									<button
+										className="w-full rounded-lg bg-green-500 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-600"
+										onClick={() => {
+											handleReserve(book.bookid);
+										}}
+									>
+										Зарезервувати
+									</button>
+								)}
 							</div>
 						</div>
 					))

@@ -1,12 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router';
 import React, { useEffect, useState } from 'react';
-import axiosInstance from '../lib/axios';
-import { useAuthStore } from '../store/authStore';
+import apiClient from '@/lib/axios';
+import { useAuthStore } from '@/store/authStore';
 
 // Define types for the data
 interface Loan {
     loanid: number;
-    book_title: string; // Assuming the view provides this
+    book_title: string;
     issuedate: string;
     duedate: string;
     returndate: string | null;
@@ -14,7 +14,7 @@ interface Loan {
 
 interface Reservation {
     reservationid: number;
-    book_title: string; // Assuming the view provides this
+    book_title: string;
     reservationdate: string;
     status: string;
 }
@@ -22,11 +22,11 @@ interface Reservation {
 interface Fine {
     fineid: number;
     amount: number;
-    reason: string;
+    violation_type: string;
     issuedate: string;
 }
 
-function MyHistoryPage() {
+function ProfilePage() {
     const [loans, setLoans] = useState<Loan[]>([]);
     const [reservations, setReservations] = useState<Reservation[]>([]);
     const [fines, setFines] = useState<Fine[]>([]);
@@ -36,11 +36,10 @@ function MyHistoryPage() {
         if (token) {
             const config = { headers: { Authorization: `Bearer ${token}` } };
             
-            // Fetch all data in parallel
             Promise.all([
-                axios.get('/api/v1/loans/my', config),
-                axios.get('/api/v1/reservations/my', config),
-                axios.get('/api/v1/fines/my-unpaid', config)
+                apiClient.get('/loans/my', config),
+                apiClient.get('/reservations/my', config),
+                apiClient.get('/fines/my-unpaid', config)
             ]).then(([loansRes, reservationsRes, finesRes]) => {
                 setLoans(loansRes.data.data || []);
                 setReservations(reservationsRes.data.data || []);
@@ -51,9 +50,22 @@ function MyHistoryPage() {
         }
     }, [token]);
 
+    const handlePayFine = async (fineId: number) => {
+        try {
+            await apiClient.post(`/fines/${fineId}/pay`, {}, { headers: { Authorization: `Bearer ${token}` } });
+            alert('Fine paid successfully!');
+            // Refresh fines
+            const finesRes = await apiClient.get('/fines/my-unpaid', { headers: { Authorization: `Bearer ${token}` } });
+            setFines(finesRes.data.data || []);
+        } catch (error) {
+            console.error("Failed to pay fine:", error);
+            alert('Failed to pay fine.');
+        }
+    };
+
     return (
         <div className="space-y-8">
-            <h1 className="text-3xl font-bold">My History</h1>
+            <h1 className="text-3xl font-bold">My Profile</h1>
             
             {/* Loans Section */}
             <div>
@@ -117,14 +129,18 @@ function MyHistoryPage() {
                                 <th className="py-2 px-4 border-b">Reason</th>
                                 <th className="py-2 px-4 border-b">Amount</th>
                                 <th className="py-2 px-4 border-b">Issue Date</th>
+                                <th className="py-2 px-4 border-b">Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             {fines.map(fine => (
                                 <tr key={fine.fineid}>
-                                    <td className="py-2 px-4 border-b">{fine.reason}</td>
+                                    <td className="py-2 px-4 border-b">{fine.violation_type}</td>
                                     <td className="py-2 px-4 border-b">${fine.amount.toFixed(2)}</td>
                                     <td className="py-2 px-4 border-b">{new Date(fine.issuedate).toLocaleDateString()}</td>
+                                    <td className="py-2 px-4 border-b">
+                                        <button onClick={() => handlePayFine(fine.fineid)} className="bg-green-500 text-white px-3 py-1 rounded">Pay</button>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
@@ -135,6 +151,6 @@ function MyHistoryPage() {
     );
 }
 
-export const Route = createFileRoute('/my-history')({
-  component: MyHistoryPage,
+export const Route = createFileRoute('/profile')({
+  component: ProfilePage,
 });

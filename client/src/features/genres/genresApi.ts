@@ -12,17 +12,17 @@ import type { Genre, CreateGenreDto, UpdateGenreDto } from "./types";
 
 const getGenres = async (): Promise<Array<Genre>> => {
 	const response = await apiClient.get<{ message: string; data: Array<Genre> }>("/genres");
-	return response.data.data;
+	return response.data;
 };
 
 const getGenreById = async (id: string): Promise<Genre> => {
 	const response = await apiClient.get<{ message: string; data: Genre }>(`/genres/${id}`);
-	return response.data.data;
+	return response.data;
 };
 
 const createGenre = async (data: CreateGenreDto): Promise<Genre> => {
 	const response = await apiClient.post<{ message: string; data: Genre }>("/genres", data);
-	return response.data.data;
+	return response.data;
 };
 
 const updateGenre = async ({
@@ -33,7 +33,7 @@ const updateGenre = async ({
 	data: UpdateGenreDto;
 }): Promise<Genre> => {
 	const response = await apiClient.put<{ message: string; data: Genre }>(`/genres/${id}`, data);
-	return response.data.data;
+	return response.data;
 };
 
 const deleteGenre = async (id: string): Promise<void> => {

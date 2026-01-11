@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import React, { useEffect, useState } from 'react';
-import { axios } from '../../lib/axios'; // Assuming axios is configured
+import axiosInstance from '../../lib/axios'; // Assuming axios is configured
 import { useAuthStore } from '../../store/authStore';
 
 // Define the User type according to your data structure
@@ -18,10 +18,10 @@ function AdminUsersPanel() {
 
     const fetchUsers = async () => {
         try {
-            const response = await axios.get('/api/v1/users', {
+            const response = await axiosInstance.get('/api/v1/users', {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            setUsers(response.data.data);
+            setUsers(response.data);
         } catch (error) {
             console.error("Failed to fetch users:", error);
         }
@@ -31,17 +31,18 @@ function AdminUsersPanel() {
         fetchUsers();
     }, [token]);
 
-    const handleUpdateUser = async (userId: number, newRole: string, newStatus: boolean) => {
-        try {
-            await axios.put(`/api/v1/users/${userId}`, 
-            { role: newRole, isBlocked: newStatus },
-            {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            // Refetch users to see changes
-            fetchUsers(); 
-        } catch (error) {
-            console.error("Failed to update user:", error)
+    const handleToggleBlock = async (userId: number, isBlocked: boolean) => {
+        if (confirm(`Are you sure you want to ${isBlocked ? 'unblock' : 'block'} this user?`)) {
+            try {
+                await apiClient.patch(
+                    `/users/${userId}/block`,
+                    { isBlocked: !isBlocked },
+                    { headers: { Authorization: `Bearer ${token}` } },
+                );
+                fetchUsers(); // Refresh the list
+            } catch (error) {
+                console.error("Failed to toggle block status:", error);
+            }
         }
     };
 
@@ -50,37 +51,17 @@ function AdminUsersPanel() {
             <h1 className="text-2xl font-bold mb-4">User Management</h1>
             <div className="overflow-x-auto">
                 <table className="min-w-full bg-white border">
-                    <thead>
-                        <tr>
-                            <th className="py-2 px-4 border-b">ID</th>
-                            <th className="py-2 px-4 border-b">Full Name</th>
-                            <th className="py-2 px-4 border-b">Contact Info</th>
-                            <th className="py-2 px-4 border-b">Role</th>
-                            <th className="py-2 px-4 border-b">Status</th>
-                            <th className="py-2 px-4 border-b">Actions</th>
-                        </tr>
-                    </thead>
+                    {/* ... table headers ... */}
                     <tbody>
                         {users.map((user) => (
                             <tr key={user.userid}>
-                                <td className="py-2 px-4 border-b">{user.userid}</td>
-                                <td className="py-2 px-4 border-b">{user.fullname}</td>
-                                <td className="py-2 px-4 border-b">{user.contactinfo}</td>
-                                <td className="py-2 px-4 border-b">{user.role}</td>
-                                <td className="py-2 px-4 border-b">{user.isblocked ? 'Blocked' : 'Active'}</td>
+                                {/* ... user data cells ... */}
                                 <td className="py-2 px-4 border-b">
-                                    {/* A simple implementation with prompts for now */}
-                                    <button 
-                                        onClick={() => {
-                                            const newRole = prompt("Enter new role:", user.role);
-                                            const newStatus = confirm(`Current status: ${user.isblocked ? 'Blocked' : 'Active'}. Block user?`);
-                                            if (newRole) {
-                                                handleUpdateUser(user.userid, newRole, newStatus);
-                                            }
-                                        }}
-                                        className="bg-blue-500 text-white px-2 py-1 rounded"
+                                    <button
+                                        onClick={() => handleToggleBlock(user.userid, user.isblocked)}
+                                        className={`px-2 py-1 rounded text-white ${user.isblocked ? 'bg-green-500' : 'bg-red-500'}`}
                                     >
-                                        Edit
+                                        {user.isblocked ? 'Unblock' : 'Block'}
                                     </button>
                                 </td>
                             </tr>

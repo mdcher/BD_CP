@@ -46,4 +46,23 @@ export const UserController = {
       next(err);
     }
   },
+  create: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const newUser = await UserService.create(req.body);
+      res.customSuccess(201, 'User created successfully.', newUser);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  toggleBlock: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId = Number(req.params.id);
+      const { isBlocked } = req.body;
+      const updatedUser = await UserService.toggleBlock(userId, isBlocked);
+      res.customSuccess(200, 'User block status updated.', updatedUser);
+    } catch (err) {
+      next(err);
+    }
+  },
 };

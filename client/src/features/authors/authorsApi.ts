@@ -12,17 +12,17 @@ import type { Author, CreateAuthorDto, UpdateAuthorDto } from "./types";
 
 const getAuthors = async (): Promise<Array<Author>> => {
 	const response = await apiClient.get<{ message: string; data: Array<Author> }>("/authors");
-	return response.data.data;
+	return response.data;
 };
 
 const getAuthorById = async (id: string): Promise<Author> => {
 	const response = await apiClient.get<{ message: string; data: Author }>(`/authors/${id}`);
-	return response.data.data;
+	return response.data;
 };
 
 const createAuthor = async (data: CreateAuthorDto): Promise<Author> => {
 	const response = await apiClient.post<{ message: string; data: Author }>("/authors", data);
-	return response.data.data;
+	return response.data;
 };
 
 const updateAuthor = async ({
@@ -33,7 +33,7 @@ const updateAuthor = async ({
 	data: UpdateAuthorDto;
 }): Promise<Author> => {
 	const response = await apiClient.put<{ message: string; data: Author }>(`/authors/${id}`, data);
-	return response.data.data;
+	return response.data;
 };
 
 const deleteAuthor = async (id: string): Promise<void> => {

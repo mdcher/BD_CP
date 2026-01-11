@@ -89,12 +89,6 @@ function RootComponent(): React.JSX.Element {
 							) : (
 								<>
 									<Link
-										to="/register"
-										className="rounded-lg border border-green-200 bg-green-50 px-4 py-2 text-sm font-medium text-green-700 transition-all hover:bg-green-100 hover:border-green-300 active:scale-95"
-									>
-										Реєстрація
-									</Link>
-									<Link
 										to="/login"
 										className="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-medium text-white shadow-md shadow-indigo-500/20 transition-all hover:bg-indigo-700 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:scale-95"
 									>

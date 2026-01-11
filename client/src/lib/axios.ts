@@ -2,7 +2,7 @@ import axios from "axios";
 import { useAuthStore } from "../store/authStore";
 import toast from "react-hot-toast";
 
-const apiClient = axios.create({
+const axiosInstance = axios.create({
 	baseURL: "/api/v1",
 	headers: {
 		"Content-Type": "application/json",
@@ -10,7 +10,7 @@ const apiClient = axios.create({
 });
 
 // Додаємо токен до кожного запиту
-apiClient.interceptors.request.use(
+axiosInstance.interceptors.request.use(
 	(config) => {
 		const token = useAuthStore.getState().token;
 
@@ -19,12 +19,16 @@ apiClient.interceptors.request.use(
 		}
 		return config;
 	},
-	(error) => Promise.reject(error)
+	(error) => Promise.reject(error),
 );
 
 // Обробляємо відповіді та помилки
-apiClient.interceptors.response.use(
+axiosInstance.interceptors.response.use(
 	(response) => {
+		// Якщо бекенд огортає дані в data.data (часта практика)
+		if (response.data && response.data.data) {
+			return { ...response, data: response.data.data };
+		}
 		return response;
 	},
 	(error) => {
@@ -42,7 +46,9 @@ apiClient.interceptors.response.use(
 			toast.error("An unexpected error occurred on the server.");
 		}
 		return Promise.reject(error);
-	}
+	},
 );
 
-export default apiClient;
+// Експортуємо обидва варіанти для сумісності
+export default axiosInstance;
+export { axiosInstance as axios, axiosInstance as apiClient };

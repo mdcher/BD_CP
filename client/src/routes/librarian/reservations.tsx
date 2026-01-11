@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import React, { useEffect, useState } from 'react';
-import { axios } from '../../lib/axios';
+import axiosInstance from '../../lib/axios';
 import { useAuthStore } from '../../store/authStore';
 
 interface Reservation {
@@ -16,10 +16,10 @@ function LibrarianReservationsPage() {
 
     const fetchReservations = async () => {
         try {
-            const response = await axios.get('/api/v1/reservations/all-active', {
+            const response = await axiosInstance.get('/api/v1/reservations/all-active', {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            setReservations(response.data.data);
+            setReservations(response.data);
         } catch (error) {
             console.error("Failed to fetch active reservations:", error);
         }
@@ -31,7 +31,7 @@ function LibrarianReservationsPage() {
     
     const handleComplete = async (reservationId: number) => {
         try {
-            await axios.post(`/api/v1/reservations/${reservationId}/complete`, 
+            await axiosInstance.post(`/api/v1/reservations/${reservationId}/complete`,
                 {},
                 { headers: { Authorization: `Bearer ${token}` } }
             );

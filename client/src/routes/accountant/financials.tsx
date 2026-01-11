@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import React, { useEffect, useState } from 'react';
-import { axios } from '../../lib/axios';
+import axiosInstance from '../../lib/axios';
 import { useAuthStore } from '../../store/authStore';
 
 interface Fine {
@@ -18,10 +18,10 @@ function AccountantFinancialsPage() {
 
     const fetchFines = async () => {
         try {
-            const response = await axios.get('/api/v1/fines', {
+            const response = await axiosInstance.get('/api/v1/fines', {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            setFines(response.data.data);
+            setFines(response.data);
         } catch (error) {
             console.error("Failed to fetch fines:", error);
         }
@@ -33,7 +33,7 @@ function AccountantFinancialsPage() {
 
     const handlePayFine = async (fineId: number) => {
         try {
-            await axios.post(`/api/v1/fines/${fineId}/pay`, 
+            await axiosInstance.post(`/api/v1/fines/${fineId}/pay`,
                 {},
                 { headers: { Authorization: `Bearer ${token}` } }
             );

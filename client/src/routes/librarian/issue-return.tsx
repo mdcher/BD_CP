@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import React, { useState } from 'react';
-import { axios } from '../../lib/axios';
+import axiosInstance from '../../lib/axios';
 import { useAuthStore } from '../../store/authStore';
 
 function IssueReturnPage() {

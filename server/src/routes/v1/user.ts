@@ -31,6 +31,11 @@ userRouter.put(
   UserController.unblock
 );
 
+userRouter.post('/', [checkJwt, checkRole([UserRole.Librarian, UserRole.Admin])], UserController.create);
+
+// Block/unblock a user (for admins)
+userRouter.patch('/:id/block', [checkJwt, checkRole([UserRole.Admin])], UserController.toggleBlock);
+
 // Оновити дані користувача (роль, статус блокування, тільки Адмін)
 userRouter.put(
     '/:id',

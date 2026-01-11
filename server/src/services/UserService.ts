@@ -39,4 +39,18 @@ export const UserService = {
       throw new CustomError(400, 'Raw', 'Update user failed', [err.message]);
     }
   },
+
+  create: async (data: any) => {
+    const connection = getConnection();
+    const { fullName, email, password, dateOfBirth, role } = data;
+    await connection.query(
+      `CALL create_user($1, $2, $3, $4, $5)`,
+      [fullName, email, password, dateOfBirth, role]
+    );
+    return { message: 'User created successfully.' };
+  },
+
+  toggleBlock: async (userId: number, isBlocked: boolean) => {
+    return UserService.setLockStatus(userId, isBlocked);
+  },
 };

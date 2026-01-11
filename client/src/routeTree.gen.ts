@@ -10,32 +10,78 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UsersRouteImport } from './routes/users'
-import { Route as RegisterRouteImport } from './routes/register'
+import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as MyHistoryRouteImport } from './routes/my-history'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as GenresRouteImport } from './routes/genres'
+import { Route as EmployeesRouteImport } from './routes/employees'
 import { Route as ChangePasswordRouteImport } from './routes/change-password'
 import { Route as BooksRouteImport } from './routes/books'
+import { Route as AuthorsRouteImport } from './routes/authors'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ReportsIndexRouteImport } from './routes/reports/index'
 import { Route as LoansIndexRouteImport } from './routes/loans/index'
+import { Route as GenresIndexRouteImport } from './routes/genres/index'
+import { Route as EmployeesIndexRouteImport } from './routes/employees/index'
 import { Route as BooksIndexRouteImport } from './routes/books/index'
+import { Route as AuthorsIndexRouteImport } from './routes/authors/index'
 import { Route as UsersUserIdRouteImport } from './routes/users.$userId'
+import { Route as ReportsTopReadersRouteImport } from './routes/reports/top-readers'
+import { Route as ReportsReadingStatsRouteImport } from './routes/reports/reading-stats'
+import { Route as ReportsGenresRouteImport } from './routes/reports/genres'
+import { Route as ReportsFinancialRouteImport } from './routes/reports/financial'
+import { Route as ReportsDebtorsRouteImport } from './routes/reports/debtors'
+import { Route as ReportsAuthorsRouteImport } from './routes/reports/authors'
 import { Route as LoansCreateRouteImport } from './routes/loans/create'
 import { Route as LoansLoanIdRouteImport } from './routes/loans/$loanId'
+import { Route as LibrarianReservationsRouteImport } from './routes/librarian/reservations'
+import { Route as LibrarianIssueReturnRouteImport } from './routes/librarian/issue-return'
+import { Route as GenresCreateRouteImport } from './routes/genres/create'
+import { Route as GenresGenreIdRouteImport } from './routes/genres/$genreId'
+import { Route as EmployeesCreateRouteImport } from './routes/employees/create'
+import { Route as EmployeesEmployeeIdRouteImport } from './routes/employees/$employeeId'
 import { Route as BooksCreateRouteImport } from './routes/books/create'
 import { Route as BooksBookIdRouteImport } from './routes/books.$bookId'
+import { Route as AuthorsCreateRouteImport } from './routes/authors/create'
+import { Route as AuthorsAuthorIdRouteImport } from './routes/authors/$authorId'
+import { Route as AdminUsersRouteImport } from './routes/admin/users'
+import { Route as AccountantFinancialsRouteImport } from './routes/accountant/financials'
+import { Route as AdminUsersCreateRouteImport } from './routes/admin/users/create'
 
 const UsersRoute = UsersRouteImport.update({
   id: '/users',
   path: '/users',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RegisterRoute = RegisterRouteImport.update({
-  id: '/register',
-  path: '/register',
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyHistoryRoute = MyHistoryRouteImport.update({
+  id: '/my-history',
+  path: '/my-history',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GenresRoute = GenresRouteImport.update({
+  id: '/genres',
+  path: '/genres',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmployeesRoute = EmployeesRouteImport.update({
+  id: '/employees',
+  path: '/employees',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChangePasswordRoute = ChangePasswordRouteImport.update({
@@ -48,25 +94,80 @@ const BooksRoute = BooksRouteImport.update({
   path: '/books',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthorsRoute = AuthorsRouteImport.update({
+  id: '/authors',
+  path: '/authors',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsIndexRoute = ReportsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ReportsRoute,
 } as any)
 const LoansIndexRoute = LoansIndexRouteImport.update({
   id: '/loans/',
   path: '/loans/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GenresIndexRoute = GenresIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => GenresRoute,
+} as any)
+const EmployeesIndexRoute = EmployeesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => EmployeesRoute,
+} as any)
 const BooksIndexRoute = BooksIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => BooksRoute,
 } as any)
+const AuthorsIndexRoute = AuthorsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthorsRoute,
+} as any)
 const UsersUserIdRoute = UsersUserIdRouteImport.update({
   id: '/$userId',
   path: '/$userId',
   getParentRoute: () => UsersRoute,
+} as any)
+const ReportsTopReadersRoute = ReportsTopReadersRouteImport.update({
+  id: '/top-readers',
+  path: '/top-readers',
+  getParentRoute: () => ReportsRoute,
+} as any)
+const ReportsReadingStatsRoute = ReportsReadingStatsRouteImport.update({
+  id: '/reading-stats',
+  path: '/reading-stats',
+  getParentRoute: () => ReportsRoute,
+} as any)
+const ReportsGenresRoute = ReportsGenresRouteImport.update({
+  id: '/genres',
+  path: '/genres',
+  getParentRoute: () => ReportsRoute,
+} as any)
+const ReportsFinancialRoute = ReportsFinancialRouteImport.update({
+  id: '/financial',
+  path: '/financial',
+  getParentRoute: () => ReportsRoute,
+} as any)
+const ReportsDebtorsRoute = ReportsDebtorsRouteImport.update({
+  id: '/debtors',
+  path: '/debtors',
+  getParentRoute: () => ReportsRoute,
+} as any)
+const ReportsAuthorsRoute = ReportsAuthorsRouteImport.update({
+  id: '/authors',
+  path: '/authors',
+  getParentRoute: () => ReportsRoute,
 } as any)
 const LoansCreateRoute = LoansCreateRouteImport.update({
   id: '/loans/create',
@@ -78,6 +179,36 @@ const LoansLoanIdRoute = LoansLoanIdRouteImport.update({
   path: '/loans/$loanId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LibrarianReservationsRoute = LibrarianReservationsRouteImport.update({
+  id: '/librarian/reservations',
+  path: '/librarian/reservations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LibrarianIssueReturnRoute = LibrarianIssueReturnRouteImport.update({
+  id: '/librarian/issue-return',
+  path: '/librarian/issue-return',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GenresCreateRoute = GenresCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => GenresRoute,
+} as any)
+const GenresGenreIdRoute = GenresGenreIdRouteImport.update({
+  id: '/$genreId',
+  path: '/$genreId',
+  getParentRoute: () => GenresRoute,
+} as any)
+const EmployeesCreateRoute = EmployeesCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => EmployeesRoute,
+} as any)
+const EmployeesEmployeeIdRoute = EmployeesEmployeeIdRouteImport.update({
+  id: '/$employeeId',
+  path: '/$employeeId',
+  getParentRoute: () => EmployeesRoute,
+} as any)
 const BooksCreateRoute = BooksCreateRouteImport.update({
   id: '/create',
   path: '/create',
@@ -88,106 +219,288 @@ const BooksBookIdRoute = BooksBookIdRouteImport.update({
   path: '/$bookId',
   getParentRoute: () => BooksRoute,
 } as any)
+const AuthorsCreateRoute = AuthorsCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => AuthorsRoute,
+} as any)
+const AuthorsAuthorIdRoute = AuthorsAuthorIdRouteImport.update({
+  id: '/$authorId',
+  path: '/$authorId',
+  getParentRoute: () => AuthorsRoute,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountantFinancialsRoute = AccountantFinancialsRouteImport.update({
+  id: '/accountant/financials',
+  path: '/accountant/financials',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminUsersCreateRoute = AdminUsersCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => AdminUsersRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/authors': typeof AuthorsRouteWithChildren
   '/books': typeof BooksRouteWithChildren
   '/change-password': typeof ChangePasswordRoute
+  '/employees': typeof EmployeesRouteWithChildren
+  '/genres': typeof GenresRouteWithChildren
   '/login': typeof LoginRoute
-  '/register': typeof RegisterRoute
+  '/my-history': typeof MyHistoryRoute
+  '/profile': typeof ProfileRoute
+  '/reports': typeof ReportsRouteWithChildren
   '/users': typeof UsersRouteWithChildren
+  '/accountant/financials': typeof AccountantFinancialsRoute
+  '/admin/users': typeof AdminUsersRouteWithChildren
+  '/authors/$authorId': typeof AuthorsAuthorIdRoute
+  '/authors/create': typeof AuthorsCreateRoute
   '/books/$bookId': typeof BooksBookIdRoute
   '/books/create': typeof BooksCreateRoute
+  '/employees/$employeeId': typeof EmployeesEmployeeIdRoute
+  '/employees/create': typeof EmployeesCreateRoute
+  '/genres/$genreId': typeof GenresGenreIdRoute
+  '/genres/create': typeof GenresCreateRoute
+  '/librarian/issue-return': typeof LibrarianIssueReturnRoute
+  '/librarian/reservations': typeof LibrarianReservationsRoute
   '/loans/$loanId': typeof LoansLoanIdRoute
   '/loans/create': typeof LoansCreateRoute
+  '/reports/authors': typeof ReportsAuthorsRoute
+  '/reports/debtors': typeof ReportsDebtorsRoute
+  '/reports/financial': typeof ReportsFinancialRoute
+  '/reports/genres': typeof ReportsGenresRoute
+  '/reports/reading-stats': typeof ReportsReadingStatsRoute
+  '/reports/top-readers': typeof ReportsTopReadersRoute
   '/users/$userId': typeof UsersUserIdRoute
+  '/authors/': typeof AuthorsIndexRoute
   '/books/': typeof BooksIndexRoute
+  '/employees/': typeof EmployeesIndexRoute
+  '/genres/': typeof GenresIndexRoute
   '/loans': typeof LoansIndexRoute
+  '/reports/': typeof ReportsIndexRoute
+  '/admin/users/create': typeof AdminUsersCreateRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/change-password': typeof ChangePasswordRoute
   '/login': typeof LoginRoute
-  '/register': typeof RegisterRoute
+  '/my-history': typeof MyHistoryRoute
+  '/profile': typeof ProfileRoute
   '/users': typeof UsersRouteWithChildren
+  '/accountant/financials': typeof AccountantFinancialsRoute
+  '/admin/users': typeof AdminUsersRouteWithChildren
+  '/authors/$authorId': typeof AuthorsAuthorIdRoute
+  '/authors/create': typeof AuthorsCreateRoute
   '/books/$bookId': typeof BooksBookIdRoute
   '/books/create': typeof BooksCreateRoute
+  '/employees/$employeeId': typeof EmployeesEmployeeIdRoute
+  '/employees/create': typeof EmployeesCreateRoute
+  '/genres/$genreId': typeof GenresGenreIdRoute
+  '/genres/create': typeof GenresCreateRoute
+  '/librarian/issue-return': typeof LibrarianIssueReturnRoute
+  '/librarian/reservations': typeof LibrarianReservationsRoute
   '/loans/$loanId': typeof LoansLoanIdRoute
   '/loans/create': typeof LoansCreateRoute
+  '/reports/authors': typeof ReportsAuthorsRoute
+  '/reports/debtors': typeof ReportsDebtorsRoute
+  '/reports/financial': typeof ReportsFinancialRoute
+  '/reports/genres': typeof ReportsGenresRoute
+  '/reports/reading-stats': typeof ReportsReadingStatsRoute
+  '/reports/top-readers': typeof ReportsTopReadersRoute
   '/users/$userId': typeof UsersUserIdRoute
+  '/authors': typeof AuthorsIndexRoute
   '/books': typeof BooksIndexRoute
+  '/employees': typeof EmployeesIndexRoute
+  '/genres': typeof GenresIndexRoute
   '/loans': typeof LoansIndexRoute
+  '/reports': typeof ReportsIndexRoute
+  '/admin/users/create': typeof AdminUsersCreateRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/authors': typeof AuthorsRouteWithChildren
   '/books': typeof BooksRouteWithChildren
   '/change-password': typeof ChangePasswordRoute
+  '/employees': typeof EmployeesRouteWithChildren
+  '/genres': typeof GenresRouteWithChildren
   '/login': typeof LoginRoute
-  '/register': typeof RegisterRoute
+  '/my-history': typeof MyHistoryRoute
+  '/profile': typeof ProfileRoute
+  '/reports': typeof ReportsRouteWithChildren
   '/users': typeof UsersRouteWithChildren
+  '/accountant/financials': typeof AccountantFinancialsRoute
+  '/admin/users': typeof AdminUsersRouteWithChildren
+  '/authors/$authorId': typeof AuthorsAuthorIdRoute
+  '/authors/create': typeof AuthorsCreateRoute
   '/books/$bookId': typeof BooksBookIdRoute
   '/books/create': typeof BooksCreateRoute
+  '/employees/$employeeId': typeof EmployeesEmployeeIdRoute
+  '/employees/create': typeof EmployeesCreateRoute
+  '/genres/$genreId': typeof GenresGenreIdRoute
+  '/genres/create': typeof GenresCreateRoute
+  '/librarian/issue-return': typeof LibrarianIssueReturnRoute
+  '/librarian/reservations': typeof LibrarianReservationsRoute
   '/loans/$loanId': typeof LoansLoanIdRoute
   '/loans/create': typeof LoansCreateRoute
+  '/reports/authors': typeof ReportsAuthorsRoute
+  '/reports/debtors': typeof ReportsDebtorsRoute
+  '/reports/financial': typeof ReportsFinancialRoute
+  '/reports/genres': typeof ReportsGenresRoute
+  '/reports/reading-stats': typeof ReportsReadingStatsRoute
+  '/reports/top-readers': typeof ReportsTopReadersRoute
   '/users/$userId': typeof UsersUserIdRoute
+  '/authors/': typeof AuthorsIndexRoute
   '/books/': typeof BooksIndexRoute
+  '/employees/': typeof EmployeesIndexRoute
+  '/genres/': typeof GenresIndexRoute
   '/loans/': typeof LoansIndexRoute
+  '/reports/': typeof ReportsIndexRoute
+  '/admin/users/create': typeof AdminUsersCreateRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/authors'
     | '/books'
     | '/change-password'
+    | '/employees'
+    | '/genres'
     | '/login'
-    | '/register'
+    | '/my-history'
+    | '/profile'
+    | '/reports'
     | '/users'
+    | '/accountant/financials'
+    | '/admin/users'
+    | '/authors/$authorId'
+    | '/authors/create'
     | '/books/$bookId'
     | '/books/create'
+    | '/employees/$employeeId'
+    | '/employees/create'
+    | '/genres/$genreId'
+    | '/genres/create'
+    | '/librarian/issue-return'
+    | '/librarian/reservations'
     | '/loans/$loanId'
     | '/loans/create'
+    | '/reports/authors'
+    | '/reports/debtors'
+    | '/reports/financial'
+    | '/reports/genres'
+    | '/reports/reading-stats'
+    | '/reports/top-readers'
     | '/users/$userId'
+    | '/authors/'
     | '/books/'
+    | '/employees/'
+    | '/genres/'
     | '/loans'
+    | '/reports/'
+    | '/admin/users/create'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/change-password'
     | '/login'
-    | '/register'
+    | '/my-history'
+    | '/profile'
     | '/users'
+    | '/accountant/financials'
+    | '/admin/users'
+    | '/authors/$authorId'
+    | '/authors/create'
     | '/books/$bookId'
     | '/books/create'
+    | '/employees/$employeeId'
+    | '/employees/create'
+    | '/genres/$genreId'
+    | '/genres/create'
+    | '/librarian/issue-return'
+    | '/librarian/reservations'
     | '/loans/$loanId'
     | '/loans/create'
+    | '/reports/authors'
+    | '/reports/debtors'
+    | '/reports/financial'
+    | '/reports/genres'
+    | '/reports/reading-stats'
+    | '/reports/top-readers'
     | '/users/$userId'
+    | '/authors'
     | '/books'
+    | '/employees'
+    | '/genres'
     | '/loans'
+    | '/reports'
+    | '/admin/users/create'
   id:
     | '__root__'
     | '/'
+    | '/authors'
     | '/books'
     | '/change-password'
+    | '/employees'
+    | '/genres'
     | '/login'
-    | '/register'
+    | '/my-history'
+    | '/profile'
+    | '/reports'
     | '/users'
+    | '/accountant/financials'
+    | '/admin/users'
+    | '/authors/$authorId'
+    | '/authors/create'
     | '/books/$bookId'
     | '/books/create'
+    | '/employees/$employeeId'
+    | '/employees/create'
+    | '/genres/$genreId'
+    | '/genres/create'
+    | '/librarian/issue-return'
+    | '/librarian/reservations'
     | '/loans/$loanId'
     | '/loans/create'
+    | '/reports/authors'
+    | '/reports/debtors'
+    | '/reports/financial'
+    | '/reports/genres'
+    | '/reports/reading-stats'
+    | '/reports/top-readers'
     | '/users/$userId'
+    | '/authors/'
     | '/books/'
+    | '/employees/'
+    | '/genres/'
     | '/loans/'
+    | '/reports/'
+    | '/admin/users/create'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthorsRoute: typeof AuthorsRouteWithChildren
   BooksRoute: typeof BooksRouteWithChildren
   ChangePasswordRoute: typeof ChangePasswordRoute
+  EmployeesRoute: typeof EmployeesRouteWithChildren
+  GenresRoute: typeof GenresRouteWithChildren
   LoginRoute: typeof LoginRoute
-  RegisterRoute: typeof RegisterRoute
+  MyHistoryRoute: typeof MyHistoryRoute
+  ProfileRoute: typeof ProfileRoute
+  ReportsRoute: typeof ReportsRouteWithChildren
   UsersRoute: typeof UsersRouteWithChildren
+  AccountantFinancialsRoute: typeof AccountantFinancialsRoute
+  AdminUsersRoute: typeof AdminUsersRouteWithChildren
+  LibrarianIssueReturnRoute: typeof LibrarianIssueReturnRoute
+  LibrarianReservationsRoute: typeof LibrarianReservationsRoute
   LoansLoanIdRoute: typeof LoansLoanIdRoute
   LoansCreateRoute: typeof LoansCreateRoute
   LoansIndexRoute: typeof LoansIndexRoute
@@ -202,11 +515,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UsersRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/register': {
-      id: '/register'
-      path: '/register'
-      fullPath: '/register'
-      preLoaderRoute: typeof RegisterRouteImport
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-history': {
+      id: '/my-history'
+      path: '/my-history'
+      fullPath: '/my-history'
+      preLoaderRoute: typeof MyHistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -214,6 +541,20 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/genres': {
+      id: '/genres'
+      path: '/genres'
+      fullPath: '/genres'
+      preLoaderRoute: typeof GenresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/employees': {
+      id: '/employees'
+      path: '/employees'
+      fullPath: '/employees'
+      preLoaderRoute: typeof EmployeesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/change-password': {
@@ -230,12 +571,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BooksRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/authors': {
+      id: '/authors'
+      path: '/authors'
+      fullPath: '/authors'
+      preLoaderRoute: typeof AuthorsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/reports/': {
+      id: '/reports/'
+      path: '/'
+      fullPath: '/reports/'
+      preLoaderRoute: typeof ReportsIndexRouteImport
+      parentRoute: typeof ReportsRoute
     }
     '/loans/': {
       id: '/loans/'
@@ -244,6 +599,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoansIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/genres/': {
+      id: '/genres/'
+      path: '/'
+      fullPath: '/genres/'
+      preLoaderRoute: typeof GenresIndexRouteImport
+      parentRoute: typeof GenresRoute
+    }
+    '/employees/': {
+      id: '/employees/'
+      path: '/'
+      fullPath: '/employees/'
+      preLoaderRoute: typeof EmployeesIndexRouteImport
+      parentRoute: typeof EmployeesRoute
+    }
     '/books/': {
       id: '/books/'
       path: '/'
@@ -251,12 +620,61 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BooksIndexRouteImport
       parentRoute: typeof BooksRoute
     }
+    '/authors/': {
+      id: '/authors/'
+      path: '/'
+      fullPath: '/authors/'
+      preLoaderRoute: typeof AuthorsIndexRouteImport
+      parentRoute: typeof AuthorsRoute
+    }
     '/users/$userId': {
       id: '/users/$userId'
       path: '/$userId'
       fullPath: '/users/$userId'
       preLoaderRoute: typeof UsersUserIdRouteImport
       parentRoute: typeof UsersRoute
+    }
+    '/reports/top-readers': {
+      id: '/reports/top-readers'
+      path: '/top-readers'
+      fullPath: '/reports/top-readers'
+      preLoaderRoute: typeof ReportsTopReadersRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/reading-stats': {
+      id: '/reports/reading-stats'
+      path: '/reading-stats'
+      fullPath: '/reports/reading-stats'
+      preLoaderRoute: typeof ReportsReadingStatsRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/genres': {
+      id: '/reports/genres'
+      path: '/genres'
+      fullPath: '/reports/genres'
+      preLoaderRoute: typeof ReportsGenresRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/financial': {
+      id: '/reports/financial'
+      path: '/financial'
+      fullPath: '/reports/financial'
+      preLoaderRoute: typeof ReportsFinancialRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/debtors': {
+      id: '/reports/debtors'
+      path: '/debtors'
+      fullPath: '/reports/debtors'
+      preLoaderRoute: typeof ReportsDebtorsRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/authors': {
+      id: '/reports/authors'
+      path: '/authors'
+      fullPath: '/reports/authors'
+      preLoaderRoute: typeof ReportsAuthorsRouteImport
+      parentRoute: typeof ReportsRoute
     }
     '/loans/create': {
       id: '/loans/create'
@@ -272,6 +690,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoansLoanIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/librarian/reservations': {
+      id: '/librarian/reservations'
+      path: '/librarian/reservations'
+      fullPath: '/librarian/reservations'
+      preLoaderRoute: typeof LibrarianReservationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/librarian/issue-return': {
+      id: '/librarian/issue-return'
+      path: '/librarian/issue-return'
+      fullPath: '/librarian/issue-return'
+      preLoaderRoute: typeof LibrarianIssueReturnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/genres/create': {
+      id: '/genres/create'
+      path: '/create'
+      fullPath: '/genres/create'
+      preLoaderRoute: typeof GenresCreateRouteImport
+      parentRoute: typeof GenresRoute
+    }
+    '/genres/$genreId': {
+      id: '/genres/$genreId'
+      path: '/$genreId'
+      fullPath: '/genres/$genreId'
+      preLoaderRoute: typeof GenresGenreIdRouteImport
+      parentRoute: typeof GenresRoute
+    }
+    '/employees/create': {
+      id: '/employees/create'
+      path: '/create'
+      fullPath: '/employees/create'
+      preLoaderRoute: typeof EmployeesCreateRouteImport
+      parentRoute: typeof EmployeesRoute
+    }
+    '/employees/$employeeId': {
+      id: '/employees/$employeeId'
+      path: '/$employeeId'
+      fullPath: '/employees/$employeeId'
+      preLoaderRoute: typeof EmployeesEmployeeIdRouteImport
+      parentRoute: typeof EmployeesRoute
+    }
     '/books/create': {
       id: '/books/create'
       path: '/create'
@@ -286,8 +746,58 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BooksBookIdRouteImport
       parentRoute: typeof BooksRoute
     }
+    '/authors/create': {
+      id: '/authors/create'
+      path: '/create'
+      fullPath: '/authors/create'
+      preLoaderRoute: typeof AuthorsCreateRouteImport
+      parentRoute: typeof AuthorsRoute
+    }
+    '/authors/$authorId': {
+      id: '/authors/$authorId'
+      path: '/$authorId'
+      fullPath: '/authors/$authorId'
+      preLoaderRoute: typeof AuthorsAuthorIdRouteImport
+      parentRoute: typeof AuthorsRoute
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/accountant/financials': {
+      id: '/accountant/financials'
+      path: '/accountant/financials'
+      fullPath: '/accountant/financials'
+      preLoaderRoute: typeof AccountantFinancialsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/users/create': {
+      id: '/admin/users/create'
+      path: '/create'
+      fullPath: '/admin/users/create'
+      preLoaderRoute: typeof AdminUsersCreateRouteImport
+      parentRoute: typeof AdminUsersRoute
+    }
   }
 }
+
+interface AuthorsRouteChildren {
+  AuthorsAuthorIdRoute: typeof AuthorsAuthorIdRoute
+  AuthorsCreateRoute: typeof AuthorsCreateRoute
+  AuthorsIndexRoute: typeof AuthorsIndexRoute
+}
+
+const AuthorsRouteChildren: AuthorsRouteChildren = {
+  AuthorsAuthorIdRoute: AuthorsAuthorIdRoute,
+  AuthorsCreateRoute: AuthorsCreateRoute,
+  AuthorsIndexRoute: AuthorsIndexRoute,
+}
+
+const AuthorsRouteWithChildren =
+  AuthorsRoute._addFileChildren(AuthorsRouteChildren)
 
 interface BooksRouteChildren {
   BooksBookIdRoute: typeof BooksBookIdRoute
@@ -303,6 +813,60 @@ const BooksRouteChildren: BooksRouteChildren = {
 
 const BooksRouteWithChildren = BooksRoute._addFileChildren(BooksRouteChildren)
 
+interface EmployeesRouteChildren {
+  EmployeesEmployeeIdRoute: typeof EmployeesEmployeeIdRoute
+  EmployeesCreateRoute: typeof EmployeesCreateRoute
+  EmployeesIndexRoute: typeof EmployeesIndexRoute
+}
+
+const EmployeesRouteChildren: EmployeesRouteChildren = {
+  EmployeesEmployeeIdRoute: EmployeesEmployeeIdRoute,
+  EmployeesCreateRoute: EmployeesCreateRoute,
+  EmployeesIndexRoute: EmployeesIndexRoute,
+}
+
+const EmployeesRouteWithChildren = EmployeesRoute._addFileChildren(
+  EmployeesRouteChildren,
+)
+
+interface GenresRouteChildren {
+  GenresGenreIdRoute: typeof GenresGenreIdRoute
+  GenresCreateRoute: typeof GenresCreateRoute
+  GenresIndexRoute: typeof GenresIndexRoute
+}
+
+const GenresRouteChildren: GenresRouteChildren = {
+  GenresGenreIdRoute: GenresGenreIdRoute,
+  GenresCreateRoute: GenresCreateRoute,
+  GenresIndexRoute: GenresIndexRoute,
+}
+
+const GenresRouteWithChildren =
+  GenresRoute._addFileChildren(GenresRouteChildren)
+
+interface ReportsRouteChildren {
+  ReportsAuthorsRoute: typeof ReportsAuthorsRoute
+  ReportsDebtorsRoute: typeof ReportsDebtorsRoute
+  ReportsFinancialRoute: typeof ReportsFinancialRoute
+  ReportsGenresRoute: typeof ReportsGenresRoute
+  ReportsReadingStatsRoute: typeof ReportsReadingStatsRoute
+  ReportsTopReadersRoute: typeof ReportsTopReadersRoute
+  ReportsIndexRoute: typeof ReportsIndexRoute
+}
+
+const ReportsRouteChildren: ReportsRouteChildren = {
+  ReportsAuthorsRoute: ReportsAuthorsRoute,
+  ReportsDebtorsRoute: ReportsDebtorsRoute,
+  ReportsFinancialRoute: ReportsFinancialRoute,
+  ReportsGenresRoute: ReportsGenresRoute,
+  ReportsReadingStatsRoute: ReportsReadingStatsRoute,
+  ReportsTopReadersRoute: ReportsTopReadersRoute,
+  ReportsIndexRoute: ReportsIndexRoute,
+}
+
+const ReportsRouteWithChildren =
+  ReportsRoute._addFileChildren(ReportsRouteChildren)
+
 interface UsersRouteChildren {
   UsersUserIdRoute: typeof UsersUserIdRoute
 }
@@ -313,13 +877,34 @@ const UsersRouteChildren: UsersRouteChildren = {
 
 const UsersRouteWithChildren = UsersRoute._addFileChildren(UsersRouteChildren)
 
+interface AdminUsersRouteChildren {
+  AdminUsersCreateRoute: typeof AdminUsersCreateRoute
+}
+
+const AdminUsersRouteChildren: AdminUsersRouteChildren = {
+  AdminUsersCreateRoute: AdminUsersCreateRoute,
+}
+
+const AdminUsersRouteWithChildren = AdminUsersRoute._addFileChildren(
+  AdminUsersRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthorsRoute: AuthorsRouteWithChildren,
   BooksRoute: BooksRouteWithChildren,
   ChangePasswordRoute: ChangePasswordRoute,
+  EmployeesRoute: EmployeesRouteWithChildren,
+  GenresRoute: GenresRouteWithChildren,
   LoginRoute: LoginRoute,
-  RegisterRoute: RegisterRoute,
+  MyHistoryRoute: MyHistoryRoute,
+  ProfileRoute: ProfileRoute,
+  ReportsRoute: ReportsRouteWithChildren,
   UsersRoute: UsersRouteWithChildren,
+  AccountantFinancialsRoute: AccountantFinancialsRoute,
+  AdminUsersRoute: AdminUsersRouteWithChildren,
+  LibrarianIssueReturnRoute: LibrarianIssueReturnRoute,
+  LibrarianReservationsRoute: LibrarianReservationsRoute,
   LoansLoanIdRoute: LoansLoanIdRoute,
   LoansCreateRoute: LoansCreateRoute,
   LoansIndexRoute: LoansIndexRoute,

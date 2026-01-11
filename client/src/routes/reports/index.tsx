@@ -62,9 +62,13 @@ function ReportsPage(): React.JSX.Element {
 		},
 	];
 
-	const filteredReports = reports.filter((report) =>
-		user?.role ? report.roles.includes(user.role) : false
-	);
+	const filteredReports =
+		!user?.role || !Array.isArray(reports)
+			? []
+			: reports.filter(
+					(report) =>
+						Array.isArray(report.roles) && user?.role && report.roles.includes(user.role),
+				);
 
 	return (
 		<div className="space-y-8 animate-in fade-in duration-500">

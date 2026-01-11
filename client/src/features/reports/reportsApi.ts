@@ -14,34 +14,34 @@ import type {
 
 const getDebtorsReport = async (): Promise<Array<Debtor>> => {
 	const response = await apiClient.get<{ message: string; data: Array<Debtor> }>("/reports/debtors");
-	return response.data.data;
+	return response.data;
 };
 
 const getFinancialSummary = async (): Promise<FinancialSummary> => {
 	const response = await apiClient.get<{ message: string; data: FinancialSummary }>("/reports/financial-summary");
-	return response.data.data;
+	return response.data;
 };
 
 const getAuthorRatings = async (): Promise<Array<AuthorRating>> => {
 	const response = await apiClient.get<{ message: string; data: Array<AuthorRating> }>("/reports/author-ratings");
-	return response.data.data;
+	return response.data;
 };
 
 const getGenrePopularity = async (): Promise<Array<GenrePopularity>> => {
 	const response = await apiClient.get<{ message: string; data: Array<GenrePopularity> }>("/reports/genre-popularity");
-	return response.data.data;
+	return response.data;
 };
 
 const getReadingStatistics = async (): Promise<Array<ReadingStatistic>> => {
 	const response = await apiClient.get<{ message: string; data: Array<ReadingStatistic> }>("/reports/reading-statistics");
-	return response.data.data;
+	return response.data;
 };
 
 const getTopReaders = async (limit: number = 10): Promise<Array<TopReader>> => {
 	const response = await apiClient.get<{ message: string; data: Array<TopReader> }>(
 		`/reports/top-readers?limit=${limit}`
 	);
-	return response.data.data;
+	return response.data;
 };
 
 export const useDebtorsReport = (): UseQueryResult<Array<Debtor>, Error> => {

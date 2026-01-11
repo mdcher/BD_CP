@@ -27,13 +27,16 @@ export interface Loan {
 
 // Backend BookResponseDto
 export interface Book {
-	id: number;
-	bookTitle: string;
+	bookid: number;
+	title: string;
+	authors: string;
+	genres: string;
 	publisher: string;
 	language: string;
 	location: string;
 	year: number;
 	status: string;
+	availabilitystatus: string;
 	loanHistory: Loan[];
 }
 

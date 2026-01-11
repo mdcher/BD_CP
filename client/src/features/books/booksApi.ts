@@ -12,17 +12,17 @@ import type { Book, CreateBookDto, UpdateBookDto } from "./types";
 
 const getBooks = async (): Promise<Array<Book>> => {
 	const response = await apiClient.get<{ message: string; data: Array<Book> }>("/books");
-	return response.data.data;
+	return response.data;
 };
 
 const getBookById = async (id: string): Promise<Book> => {
 	const response = await apiClient.get<{ message: string; data: Book }>(`/books/${id}`);
-	return response.data.data;
+	return response.data;
 };
 
 const createBook = async (data: CreateBookDto): Promise<Book> => {
 	const response = await apiClient.post<{ message: string; data: Book }>("/books", data);
-	return response.data.data;
+	return response.data;
 };
 
 const updateBook = async ({
@@ -33,7 +33,7 @@ const updateBook = async ({
 	data: UpdateBookDto;
 }): Promise<Book> => {
 	const response = await apiClient.put<{ message: string; data: Book }>(`/books/${id}`, data);
-	return response.data.data;
+	return response.data;
 };
 
 const deleteBook = async (id: string): Promise<void> => {

@@ -19,8 +19,8 @@ export class User {
   @Column({ name: 'contactinfo' }) // ВИПРАВЛЕНО
   contactInfo: string;
 
-  @Column({ name: 'password_hash', select: false }) // ВИПРАВЛЕНО
-  password: string;
+	@Column({ name: 'password_hash', nullable: true })
+	password_hash: string;
 
   @Column({
     type: 'enum',

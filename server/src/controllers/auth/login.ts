@@ -1,27 +1,23 @@
 import { Request, Response, NextFunction } from 'express';
-import { getConnection } from 'typeorm';
+import { getRepository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
+import { User } from '../../orm/entities/User';
 import { JwtPayload } from '../../types/JwtPayload';
 import { createJwtToken } from '../../utils/createJwtToken';
 import { CustomError } from '../../utils/response/custom-error/CustomError';
 
 export const login = async (req: Request, res: Response, next: NextFunction) => {
-    const { contactInfo, password } = req.body;
+    const { email: contactInfo, password } = req.body;
 
     try {
-        console.log('🔍 Login attempt:', contactInfo);
-
-        const connection = getConnection();
-
-        const users = await connection.query('SELECT * FROM login($1)', [contactInfo]);
+        const userRepository = getRepository(User);
+        const users = await userRepository.query('SELECT * FROM public.login($1::character varying)', [contactInfo]);
 
         if (!users || users.length === 0) {
             throw new CustomError(404, 'General', 'Incorrect email or password', ['User not found.']);
         }
 
         const user = users[0];
-        console.log('✅ User found:', { userid: user.userid, role: user.role });
-
         const isPasswordMatch = await bcrypt.compare(password, user.password_hash);
 
         if (!isPasswordMatch) {
@@ -36,10 +32,9 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         };
 
         const token = createJwtToken(jwtPayload);
-        res.customSuccess(200, 'Token successfully created.', `Bearer ${token}`);
+        res.customSuccess(200, 'Token successfully created.', { token });
 
-    } catch (err: any) {
-        console.error('❌ Login error:', err.message || err);
+    } catch (err) {
         if (err instanceof CustomError) {
             return next(err);
         }
