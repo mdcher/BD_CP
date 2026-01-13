@@ -25,7 +25,12 @@ app.use(cors({
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(getLanguage);
+import { checkJwt } from './middleware/checkJwt';
+import { setDatabaseRole } from './middleware/setDatabaseRole';
+
+import { authMiddleware } from './middleware/auth';
+
+
 
 try {
     const logDirectory = path.join(__dirname, '../log');
