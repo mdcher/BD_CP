@@ -1,32 +1,37 @@
 import { getConnection } from 'typeorm';
 import { CustomError } from '../utils/response/custom-error/CustomError';
+import * as bcrypt from 'bcryptjs';
 
 export const UserService = {
-  // Отримати список всіх користувачів (для адмінів/бібліотекарів)
   getAll: async () => {
     const connection = getConnection();
-    // Логіка перенесена в SQL VIEW. RLS політики відфільтрують дані автоматично.
-    const query = `SELECT * FROM v_all_users_for_admin;`;
-    return await connection.query(query);
+    try {
+      const query = `SELECT * FROM v_all_users_for_admin;`;
+      return await connection.query(query);
+    } catch (err) {
+      throw new CustomError(500, 'Raw', 'Failed to fetch users', null, err);
+    }
   },
 
-  // Оновити статус блокування користувача
   setLockStatus: async (userId: number, isBlocked: boolean) => {
     const connection = getConnection();
-    const query = `
-      UPDATE public.users
-      SET isblocked = $1::boolean
-      WHERE userid = $2::integer
-      RETURNING userid, fullname, isblocked;
-    `;
-    const result = await connection.query(query, [isBlocked, userId]);
-    if (result[1] === 0) {
-      throw new CustomError(404, 'General', `User with ID ${userId} not found.`);
+    try {
+      const query = `
+        UPDATE public.users
+        SET isblocked = $1::boolean
+        WHERE userid = $2::integer
+        RETURNING userid, fullname, isblocked;
+      `;
+      const result = await connection.query(query, [isBlocked, userId]);
+      if (result[1] === 0) {
+        throw new CustomError(404, 'General', `User with ID ${userId} not found.`);
+      }
+      return result[0][0];
+    } catch (err) {
+      throw new CustomError(500, 'Raw', 'Failed to update user lock status', null, err);
     }
-    return result[0][0];
   },
 
-  // Оновити дані користувача (роль, статус блокування)
   updateUser: async (adminId: number, targetUserId: number, data: { role: string, isBlocked: boolean }) => {
     const connection = getConnection();
     try {
@@ -43,11 +48,16 @@ export const UserService = {
   create: async (data: any) => {
     const connection = getConnection();
     const { fullName, email, password, dateOfBirth, role } = data;
-    await connection.query(
-      `CALL create_user($1, $2, $3, $4, $5)`,
-      [fullName, email, password, dateOfBirth, role]
-    );
-    return { message: 'User created successfully.' };
+    try {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      await connection.query(
+        `CALL create_user($1, $2, $3, $4, $5)`,
+        [fullName, email, hashedPassword, dateOfBirth, role]
+      );
+      return { message: 'User created successfully.' };
+    } catch (err) {
+      throw new CustomError(500, 'Raw', 'Failed to create user', null, err);
+    }
   },
 
   toggleBlock: async (userId: number, isBlocked: boolean) => {
