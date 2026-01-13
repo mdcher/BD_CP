@@ -6,7 +6,7 @@ import { createJwtToken } from '../../utils/createJwtToken';
 import { CustomError } from '../../utils/response/custom-error/CustomError';
 
 export const login = async (req: Request, res: Response, next: NextFunction) => {
-    const { contactInfo, password } = req.body;
+    const { email: contactInfo, password } = req.body;
 
     try {
         console.log('🔍 Login attempt:', contactInfo);
@@ -43,7 +43,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         };
 
         const token = createJwtToken(jwtPayload);
-        res.customSuccess(200, 'Token successfully created.', `Bearer ${token}`);
+        res.customSuccess(200, 'Token successfully created.', { token });
 
     } catch (err: any) {
         console.error('❌ Login error:', err.message || err);

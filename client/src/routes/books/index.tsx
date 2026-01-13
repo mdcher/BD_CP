@@ -2,6 +2,7 @@ import type * as React from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuthStore } from "@/store/authStore.ts";
 import { useBooks, useDeleteBook } from "@/features/books/booksApi.ts";
+import { apiClient } from "@/lib/axios.ts";
 import { useState } from "react";
 
 function BooksPage(): React.JSX.Element {

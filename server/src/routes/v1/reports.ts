@@ -2,9 +2,13 @@ import { Router } from 'express';
 import { ReportController } from '../../controllers/ReportController';
 import { checkJwt } from '../../middleware/checkJwt';
 import { checkRole } from '../../middleware/checkRole';
+import { setDatabaseRole } from '../../middleware/setDatabaseRole';
 import { UserRole } from '../../orm/entities/User';
 
 const reportRouter = Router();
+
+// ВАЖЛИВО: Застосовуємо setDatabaseRole для RLS політик
+reportRouter.use(setDatabaseRole);
 
 // Звіт про боржників (для бібліотекарів та адмінів)
 reportRouter.get(

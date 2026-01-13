@@ -2,9 +2,13 @@ import { Router } from 'express';
 import { EmployeeController } from '../../controllers/EmployeeController';
 import { checkJwt } from '../../middleware/checkJwt';
 import { checkRole } from '../../middleware/checkRole';
+import { setDatabaseRole } from '../../middleware/setDatabaseRole';
 import { UserRole } from '../../orm/entities/User';
 
 const employeeRouter = Router();
+
+// ВАЖЛИВО: Застосовуємо setDatabaseRole для RLS політик
+employeeRouter.use(setDatabaseRole);
 
 // Всі маршрути доступні тільки для Admin та Accountant
 const allowedRoles = [UserRole.Admin, 'Accountant' as UserRole];

@@ -2,9 +2,13 @@ import { Router } from 'express';
 import { GenreController } from '../../controllers/GenreController';
 import { checkJwt } from '../../middleware/checkJwt';
 import { checkRole } from '../../middleware/checkRole';
+import { setDatabaseRole } from '../../middleware/setDatabaseRole';
 import { UserRole } from '../../orm/entities/User';
 
 const genreRouter = Router();
+
+// ВАЖЛИВО: Застосовуємо setDatabaseRole для RLS політик
+genreRouter.use(setDatabaseRole);
 
 // Публічний ендпоінт для перегляду всіх жанрів
 genreRouter.get('/', GenreController.getAll);

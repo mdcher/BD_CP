@@ -118,13 +118,13 @@ function EmployeesPage(): React.JSX.Element {
 										{employee.position}
 									</td>
 									<td className="whitespace-nowrap px-6 py-4 text-sm text-slate-900">
-										{employee.salaryrate.toFixed(2)}
+										{Number(employee.salaryrate).toFixed(2)}
 									</td>
 									<td className="whitespace-nowrap px-6 py-4 text-sm text-slate-900">
 										{employee.workedhours}
 									</td>
 									<td className="whitespace-nowrap px-6 py-4 text-sm font-semibold text-green-600">
-										{employee.calculatedsalary.toFixed(2)} грн
+										{Number(employee.calculatedsalary).toFixed(2)} грн
 									</td>
 									<td className="whitespace-nowrap px-6 py-4 text-right text-sm">
 										<div className="flex justify-end gap-2">

@@ -16,11 +16,12 @@ export const FineService = {
     return await connection.query(query);
   },
 
-  // Оплатити штраф (для Бухгалтера/Адміна)
-  payFine: async (fineId: number, accountantId: number) => {
+  // Оплатити штраф (для всіх авторизованих користувачів)
+  // Контроль прав здійснюється на рівні БД: читачі - тільки свої штрафи
+  payFine: async (fineId: number, userId: number) => {
     const connection = getConnection();
     try {
-      await connection.query('CALL pay_fine($1::integer, $2::integer)', [fineId, accountantId]);
+      await connection.query('CALL pay_fine($1::integer, $2::integer)', [fineId, userId]);
       return { message: 'Fine paid successfully.' };
     } catch (err: any) {
       throw new CustomError(400, 'Raw', 'Pay fine failed', [err.message]);

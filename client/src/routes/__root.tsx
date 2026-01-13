@@ -36,35 +36,36 @@ function RootComponent(): React.JSX.Element {
 
 						{/* Навігація */}
 						<nav className="flex items-center gap-1 sm:gap-2">
+							{/* Публічний доступ - каталог доступний всім (включно з гостями) */}
+							<Link
+								to="/books"
+								activeProps={{
+									className:
+										"bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200",
+								}}
+								className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900"
+							>
+								Каталог
+							</Link>
+
 							{isAuthenticated && (
 								<>
-                                    <Link
-                                        to="/books"
-                                        activeProps={{
-                                            className:
-                                                "bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200",
-                                        }}
-                                        className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900"
-                                    >
-                                        Каталог
-                                    </Link>
+									{/* Librarian/Admin Links */}
+									{(user?.role === 'Librarian' || user?.role === 'Admin') && (
+										<>
+											<Link to="/authors" activeProps={{ className: "bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200" }} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">Автори</Link>
+											<Link to="/genres" activeProps={{ className: "bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200" }} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">Жанри</Link>
+										</>
+									)}
 
-                                    {/* Librarian/Admin Links */}
-                                    {(user?.role === 'Librarian' || user?.role === 'Admin') && (
-                                        <>
-                                            <Link to="/authors" activeProps={{ className: "bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200" }} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">Автори</Link>
-                                            <Link to="/genres" activeProps={{ className: "bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200" }} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">Жанри</Link>
-                                        </>
-                                    )}
+									{/* Admin/Accountant Links */}
+									{(user?.role === 'Admin' || user?.role === 'Accountant') && (
+										<Link to="/employees" activeProps={{ className: "bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200" }} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">Співробітники</Link>
+									)}
 
-                                    {/* Admin/Accountant Links */}
-                                    {(user?.role === 'Admin' || user?.role === 'Accountant') && (
-                                        <Link to="/employees" activeProps={{ className: "bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200" }} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">Співробітники</Link>
-                                    )}
-
-                                    {/* All Authenticated Users */}
-                                    <Link to="/reports" activeProps={{ className: "bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200" }} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">Звіти</Link>
-                                </>
+									{/* All Authenticated Users */}
+									<Link to="/reports" activeProps={{ className: "bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200" }} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">Звіти</Link>
+								</>
 							)}
 
 							<div className="mx-2 h-6 w-px bg-slate-200" />

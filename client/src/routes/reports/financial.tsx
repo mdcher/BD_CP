@@ -109,19 +109,19 @@ function FinancialReportPage(): React.JSX.Element {
 					<div className="flex justify-between border-b border-slate-200 pb-3">
 						<span className="font-medium text-slate-700">Всього доходів:</span>
 						<span className="font-semibold text-green-600">
-							+{summary?.totalincomefines.toFixed(2)} грн
+							+{Number(summary?.totalincomefines || 0).toFixed(2)} грн
 						</span>
 					</div>
 					<div className="flex justify-between border-b border-slate-200 pb-3">
 						<span className="font-medium text-slate-700">Витрати на книги:</span>
 						<span className="font-semibold text-red-600">
-							-{summary?.expensesbooks.toFixed(2)} грн
+							-{Number(summary?.expensesbooks || 0).toFixed(2)} грн
 						</span>
 					</div>
 					<div className="flex justify-between border-b border-slate-200 pb-3">
 						<span className="font-medium text-slate-700">Витрати на зарплати:</span>
 						<span className="font-semibold text-red-600">
-							-{summary?.expensessalaries.toFixed(2)} грн
+							-{Number(summary?.expensessalaries || 0).toFixed(2)} грн
 						</span>
 					</div>
 					<div className="flex justify-between pt-3">

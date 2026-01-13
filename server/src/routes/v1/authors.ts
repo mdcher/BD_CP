@@ -2,9 +2,13 @@ import { Router } from 'express';
 import { AuthorController } from '../../controllers/AuthorController';
 import { checkJwt } from '../../middleware/checkJwt';
 import { checkRole } from '../../middleware/checkRole';
+import { setDatabaseRole } from '../../middleware/setDatabaseRole';
 import { UserRole } from '../../orm/entities/User';
 
 const authorRouter = Router();
+
+// ВАЖЛИВО: Застосовуємо setDatabaseRole для RLS політик
+authorRouter.use(setDatabaseRole);
 
 // Публічний ендпоінт для перегляду всіх авторів
 authorRouter.get('/', AuthorController.getAll);

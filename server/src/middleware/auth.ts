@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { getConnection } from 'typeorm';
 import { CustomError } from '../utils/response/custom-error/CustomError';
 import { JwtPayload } from '../types/JwtPayload';
 
@@ -10,13 +9,9 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     console.log('Authorization header:', authHeader);
 
     if (!authHeader) {
-        try {
-            const connection = getConnection();
-            await connection.query('SET ROLE role_guest');
-            console.log('Set role to role_guest');
-        } catch (err) {
-            console.error('Failed to set role_guest:', err);
-        }
+        // Якщо немає Authorization header, користувач залишається неавторизованим
+        // Роль role_guest буде встановлена в setDatabaseRole middleware
+        console.log('No authorization header, user will be treated as guest');
         return next();
     }
 
@@ -29,21 +24,9 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
         req.jwtPayload = jwtPayload;
         console.log('JWT payload verified:', jwtPayload);
 
-        if (jwtPayload && jwtPayload.role) {
-            const roleMapping: { [key: string]: string } = {
-                'Reader': 'role_reader',
-                'Librarian': 'role_librarian',
-                'Admin': 'role_admin',
-                'Accountant': 'role_accountant',
-            };
-
-            const dbRole = roleMapping[jwtPayload.role] || 'role_guest';
-            const connection = getConnection();
-            await connection.query(`SET ROLE "${dbRole}"`);
-            console.log(`Set role to ${dbRole}`);
-        }
+        // Роль БД встановлюється в setDatabaseRole middleware
     } catch (err) {
-        console.error('JWT verification or role setting error:', err);
+        console.error('JWT verification error:', err);
         const customError = new CustomError(401, 'Raw', 'JWT error', null, err);
         return next(customError);
     }

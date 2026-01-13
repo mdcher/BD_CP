@@ -2,9 +2,13 @@ import { Router } from 'express';
 import { OrderController } from '../../controllers/OrderController';
 import { checkJwt } from '../../middleware/checkJwt';
 import { checkRole } from '../../middleware/checkRole';
+import { setDatabaseRole } from '../../middleware/setDatabaseRole';
 import { UserRole } from '../../orm/entities/User';
 
 const orderRouter = Router();
+
+// ВАЖЛИВО: Застосовуємо setDatabaseRole для RLS політик
+orderRouter.use(setDatabaseRole);
 
 // Отримати прайс-лист (доступно для персоналу)
 orderRouter.get(

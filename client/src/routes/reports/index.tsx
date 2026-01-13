@@ -7,6 +7,15 @@ function ReportsPage(): React.JSX.Element {
 
 	const reports = [
 		{
+			title: "Мої штрафи",
+			description: "Перегляд та оплата штрафів",
+			icon: "💳",
+			link: "/reports/my-fines",
+			roles: ["Reader"],
+			color: "from-orange-500 to-orange-600",
+			bgColor: "bg-orange-50",
+		},
+		{
 			title: "Боржники",
 			description: "Користувачі з простроченими книгами",
 			icon: "⚠️",

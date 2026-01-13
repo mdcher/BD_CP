@@ -29,6 +29,7 @@ import { Route as AuthorsIndexRouteImport } from './routes/authors/index'
 import { Route as UsersUserIdRouteImport } from './routes/users.$userId'
 import { Route as ReportsTopReadersRouteImport } from './routes/reports/top-readers'
 import { Route as ReportsReadingStatsRouteImport } from './routes/reports/reading-stats'
+import { Route as ReportsMyFinesRouteImport } from './routes/reports/my-fines'
 import { Route as ReportsGenresRouteImport } from './routes/reports/genres'
 import { Route as ReportsFinancialRouteImport } from './routes/reports/financial'
 import { Route as ReportsDebtorsRouteImport } from './routes/reports/debtors'
@@ -147,6 +148,11 @@ const ReportsTopReadersRoute = ReportsTopReadersRouteImport.update({
 const ReportsReadingStatsRoute = ReportsReadingStatsRouteImport.update({
   id: '/reading-stats',
   path: '/reading-stats',
+  getParentRoute: () => ReportsRoute,
+} as any)
+const ReportsMyFinesRoute = ReportsMyFinesRouteImport.update({
+  id: '/my-fines',
+  path: '/my-fines',
   getParentRoute: () => ReportsRoute,
 } as any)
 const ReportsGenresRoute = ReportsGenresRouteImport.update({
@@ -275,6 +281,7 @@ export interface FileRoutesByFullPath {
   '/reports/debtors': typeof ReportsDebtorsRoute
   '/reports/financial': typeof ReportsFinancialRoute
   '/reports/genres': typeof ReportsGenresRoute
+  '/reports/my-fines': typeof ReportsMyFinesRoute
   '/reports/reading-stats': typeof ReportsReadingStatsRoute
   '/reports/top-readers': typeof ReportsTopReadersRoute
   '/users/$userId': typeof UsersUserIdRoute
@@ -311,6 +318,7 @@ export interface FileRoutesByTo {
   '/reports/debtors': typeof ReportsDebtorsRoute
   '/reports/financial': typeof ReportsFinancialRoute
   '/reports/genres': typeof ReportsGenresRoute
+  '/reports/my-fines': typeof ReportsMyFinesRoute
   '/reports/reading-stats': typeof ReportsReadingStatsRoute
   '/reports/top-readers': typeof ReportsTopReadersRoute
   '/users/$userId': typeof UsersUserIdRoute
@@ -353,6 +361,7 @@ export interface FileRoutesById {
   '/reports/debtors': typeof ReportsDebtorsRoute
   '/reports/financial': typeof ReportsFinancialRoute
   '/reports/genres': typeof ReportsGenresRoute
+  '/reports/my-fines': typeof ReportsMyFinesRoute
   '/reports/reading-stats': typeof ReportsReadingStatsRoute
   '/reports/top-readers': typeof ReportsTopReadersRoute
   '/users/$userId': typeof UsersUserIdRoute
@@ -396,6 +405,7 @@ export interface FileRouteTypes {
     | '/reports/debtors'
     | '/reports/financial'
     | '/reports/genres'
+    | '/reports/my-fines'
     | '/reports/reading-stats'
     | '/reports/top-readers'
     | '/users/$userId'
@@ -432,6 +442,7 @@ export interface FileRouteTypes {
     | '/reports/debtors'
     | '/reports/financial'
     | '/reports/genres'
+    | '/reports/my-fines'
     | '/reports/reading-stats'
     | '/reports/top-readers'
     | '/users/$userId'
@@ -473,6 +484,7 @@ export interface FileRouteTypes {
     | '/reports/debtors'
     | '/reports/financial'
     | '/reports/genres'
+    | '/reports/my-fines'
     | '/reports/reading-stats'
     | '/reports/top-readers'
     | '/users/$userId'
@@ -646,6 +658,13 @@ declare module '@tanstack/react-router' {
       path: '/reading-stats'
       fullPath: '/reports/reading-stats'
       preLoaderRoute: typeof ReportsReadingStatsRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/my-fines': {
+      id: '/reports/my-fines'
+      path: '/my-fines'
+      fullPath: '/reports/my-fines'
+      preLoaderRoute: typeof ReportsMyFinesRouteImport
       parentRoute: typeof ReportsRoute
     }
     '/reports/genres': {
@@ -849,6 +868,7 @@ interface ReportsRouteChildren {
   ReportsDebtorsRoute: typeof ReportsDebtorsRoute
   ReportsFinancialRoute: typeof ReportsFinancialRoute
   ReportsGenresRoute: typeof ReportsGenresRoute
+  ReportsMyFinesRoute: typeof ReportsMyFinesRoute
   ReportsReadingStatsRoute: typeof ReportsReadingStatsRoute
   ReportsTopReadersRoute: typeof ReportsTopReadersRoute
   ReportsIndexRoute: typeof ReportsIndexRoute
@@ -859,6 +879,7 @@ const ReportsRouteChildren: ReportsRouteChildren = {
   ReportsDebtorsRoute: ReportsDebtorsRoute,
   ReportsFinancialRoute: ReportsFinancialRoute,
   ReportsGenresRoute: ReportsGenresRoute,
+  ReportsMyFinesRoute: ReportsMyFinesRoute,
   ReportsReadingStatsRoute: ReportsReadingStatsRoute,
   ReportsTopReadersRoute: ReportsTopReadersRoute,
   ReportsIndexRoute: ReportsIndexRoute,

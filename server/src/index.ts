@@ -58,8 +58,20 @@ const port = process.env.PORT || 4000;
         await dbCreateConnection();
         console.log('✅ Database connected successfully');
 
-        app.listen(port, () => {
+        const server = app.listen(port, () => {
             console.log(`🚀 Server running on port ${port}`);
+        });
+
+        server.on('error', (error: NodeJS.ErrnoException) => {
+            if (error.code === 'EADDRINUSE') {
+                console.error(`❌ Port ${port} is already in use. Please free the port or change the PORT environment variable.`);
+                console.error(`   To find the process: netstat -ano | findstr :${port}`);
+                console.error(`   To kill the process: taskkill //PID <PID> //F`);
+                process.exit(1);
+            } else {
+                console.error('❌ Server error:', error.message);
+                process.exit(1);
+            }
         });
     } catch (error) {
         console.error('❌ Failed to start server:', error.message);
