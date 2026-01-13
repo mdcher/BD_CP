@@ -5,7 +5,7 @@ export const FineService = {
   // Отримати всі неоплачені штрафи користувача (через RLS)
   getMyUnpaid: async () => {
     const connection = getConnection();
-    const query = `SELECT * FROM v_reader_unpaid_fines ORDER BY issuedate DESC;`;
+    const query = `SELECT * FROM public.v_reader_unpaid_fines ORDER BY issuedate DESC;`;
     return await connection.query(query);
   },
 

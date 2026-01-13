@@ -29,7 +29,7 @@ export const ReservationService = {
   // Отримати всі бронювання поточного користувача (через RLS)
   getByUser: async () => {
     const connection = getConnection();
-    const query = `SELECT * FROM v_reader_reservations ORDER BY reservationdate DESC;`;
+    const query = `SELECT * FROM public.v_reader_reservations ORDER BY reservationdate DESC;`;
     return await connection.query(query);
   },
 

@@ -31,7 +31,7 @@ export const LoanService = {
     const connection = getConnection();
     // RLS політика в БД автоматично відфільтрує записи для поточного користувача
     const history = await connection.query(
-      `SELECT * FROM v_reader_loans ORDER BY issuedate DESC`
+      `SELECT * FROM public.v_reader_loans ORDER BY issuedate DESC`
     );
     return history;
   },

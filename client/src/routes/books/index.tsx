@@ -170,11 +170,13 @@ function BooksPage(): React.JSX.Element {
 										</button>
 									</>
 								)}
-								{isReader && book.availabilitystatus === "Available" && (
+								{isReader && (
 									<button
 										className="w-full rounded-lg bg-green-500 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-600"
 										onClick={() => {
-											handleReserve(book.bookid);
+											if (confirm("Ви впевнені, що хочете забронювати цю книгу?")) {
+												handleReserve(book.bookid);
+											}
 										}}
 									>
 										Зарезервувати

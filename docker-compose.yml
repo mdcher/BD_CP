@@ -12,8 +12,8 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      # Цей рядок ініціалізує БД за допомогою вашого скрипта
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      # Цей рядок ініціалізує БД за допомогою усіх скриптів у папці db
+      - ./db:/docker-entrypoint-initdb.d
       # Цей рядок зберігає дані БД між перезапусками контейнера
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
