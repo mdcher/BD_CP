@@ -10,7 +10,8 @@ export const ReportService = {
   // Фінансовий звіт (для бухгалтерів та адмінів)
   getFinancialSummary: async () => {
     const connection = getConnection();
-    return await connection.query(`SELECT * FROM public.view_financial_summary;`);
+    const result = await connection.query(`SELECT * FROM public.view_financial_summary;`);
+    return result[0] || null;
   },
 
   // Рейтинг авторів (публічний або для персоналу)

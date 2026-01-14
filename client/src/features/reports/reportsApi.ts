@@ -14,34 +14,34 @@ import type {
 
 const getDebtorsReport = async (): Promise<Array<Debtor>> => {
 	const response = await apiClient.get<{ message: string; data: Array<Debtor> }>("/reports/debtors");
-	return response.data;
+	return response.data.data || [];
 };
 
-const getFinancialSummary = async (): Promise<FinancialSummary> => {
+const getFinancialSummary = async (): Promise<FinancialSummary | null> => {
 	const response = await apiClient.get<{ message: string; data: FinancialSummary }>("/reports/financial-summary");
-	return response.data;
+	return response.data.data || null;
 };
 
 const getAuthorRatings = async (): Promise<Array<AuthorRating>> => {
 	const response = await apiClient.get<{ message: string; data: Array<AuthorRating> }>("/reports/author-ratings");
-	return response.data;
+	return response.data.data || [];
 };
 
 const getGenrePopularity = async (): Promise<Array<GenrePopularity>> => {
 	const response = await apiClient.get<{ message: string; data: Array<GenrePopularity> }>("/reports/genre-popularity");
-	return response.data;
+	return response.data.data || [];
 };
 
 const getReadingStatistics = async (): Promise<Array<ReadingStatistic>> => {
 	const response = await apiClient.get<{ message: string; data: Array<ReadingStatistic> }>("/reports/reading-statistics");
-	return response.data;
+	return response.data.data || [];
 };
 
 const getTopReaders = async (limit: number = 10): Promise<Array<TopReader>> => {
 	const response = await apiClient.get<{ message: string; data: Array<TopReader> }>(
 		`/reports/top-readers?limit=${limit}`
 	);
-	return response.data;
+	return response.data.data || [];
 };
 
 export const useDebtorsReport = (): UseQueryResult<Array<Debtor>, Error> => {
@@ -51,8 +51,8 @@ export const useDebtorsReport = (): UseQueryResult<Array<Debtor>, Error> => {
 	});
 };
 
-export const useFinancialSummary = (): UseQueryResult<FinancialSummary, Error> => {
-	return useQuery<FinancialSummary, Error>({
+export const useFinancialSummary = (): UseQueryResult<FinancialSummary | null, Error> => {
+	return useQuery<FinancialSummary | null, Error>({
 		queryKey: ["reports", "financial-summary"],
 		queryFn: getFinancialSummary,
 	});

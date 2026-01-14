@@ -734,28 +734,34 @@ DECLARE
     author_id integer;
     genre_id integer;
 BEGIN
+    -- Перевіряємо обов'язковість авторів
+    IF p_author_ids IS NULL OR array_length(p_author_ids, 1) IS NULL OR array_length(p_author_ids, 1) = 0 THEN
+        RAISE EXCEPTION 'At least one author is required';
+    END IF;
+
+    -- Перевіряємо обов'язковість жанрів
+    IF p_genre_ids IS NULL OR array_length(p_genre_ids, 1) IS NULL OR array_length(p_genre_ids, 1) = 0 THEN
+        RAISE EXCEPTION 'At least one genre is required';
+    END IF;
+
     -- Створюємо книгу
     INSERT INTO public.books (title, publisher, language, year, location, status)
     VALUES (p_title, p_publisher, p_language, p_year, p_location, p_status)
     RETURNING bookid INTO v_book_id;
 
     -- Додаємо авторів
-    IF p_author_ids IS NOT NULL THEN
-        FOREACH author_id IN ARRAY p_author_ids
-        LOOP
-            INSERT INTO public.book_authors (bookid, authorid)
-            VALUES (v_book_id, author_id);
-        END LOOP;
-    END IF;
+    FOREACH author_id IN ARRAY p_author_ids
+    LOOP
+        INSERT INTO public.book_authors (bookid, authorid)
+        VALUES (v_book_id, author_id);
+    END LOOP;
 
     -- Додаємо жанри
-    IF p_genre_ids IS NOT NULL THEN
-        FOREACH genre_id IN ARRAY p_genre_ids
-        LOOP
-            INSERT INTO public.book_genres (bookid, genreid)
-            VALUES (v_book_id, genre_id);
-        END LOOP;
-    END IF;
+    FOREACH genre_id IN ARRAY p_genre_ids
+    LOOP
+        INSERT INTO public.book_genres (bookid, genreid)
+        VALUES (v_book_id, genre_id);
+    END LOOP;
 
     RAISE NOTICE 'Книгу "%" успішно створено з ID %', p_title, v_book_id;
 END;
@@ -778,6 +784,16 @@ DECLARE
     author_id integer;
     genre_id integer;
 BEGIN
+    -- Перевіряємо обов'язковість авторів
+    IF p_author_ids IS NULL OR array_length(p_author_ids, 1) IS NULL OR array_length(p_author_ids, 1) = 0 THEN
+        RAISE EXCEPTION 'At least one author is required';
+    END IF;
+
+    -- Перевіряємо обов'язковість жанрів
+    IF p_genre_ids IS NULL OR array_length(p_genre_ids, 1) IS NULL OR array_length(p_genre_ids, 1) = 0 THEN
+        RAISE EXCEPTION 'At least one genre is required';
+    END IF;
+
     -- Оновлюємо основні дані книги
     UPDATE public.books
     SET title = p_title,
@@ -790,23 +806,19 @@ BEGIN
 
     -- Оновлюємо авторів (видаляємо старі та додаємо нові)
     DELETE FROM public.book_authors WHERE bookid = p_book_id;
-    IF p_author_ids IS NOT NULL THEN
-        FOREACH author_id IN ARRAY p_author_ids
-        LOOP
-            INSERT INTO public.book_authors (bookid, authorid)
-            VALUES (p_book_id, author_id);
-        END LOOP;
-    END IF;
+    FOREACH author_id IN ARRAY p_author_ids
+    LOOP
+        INSERT INTO public.book_authors (bookid, authorid)
+        VALUES (p_book_id, author_id);
+    END LOOP;
 
     -- Оновлюємо жанри (видаляємо старі та додаємо нові)
     DELETE FROM public.book_genres WHERE bookid = p_book_id;
-    IF p_genre_ids IS NOT NULL THEN
-        FOREACH genre_id IN ARRAY p_genre_ids
-        LOOP
-            INSERT INTO public.book_genres (bookid, genreid)
-            VALUES (p_book_id, genre_id);
-        END LOOP;
-    END IF;
+    FOREACH genre_id IN ARRAY p_genre_ids
+    LOOP
+        INSERT INTO public.book_genres (bookid, genreid)
+        VALUES (p_book_id, genre_id);
+    END LOOP;
 
     RAISE NOTICE 'Книгу з ID % успішно оновлено', p_book_id;
 END;
@@ -1090,13 +1102,14 @@ CREATE OR REPLACE PROCEDURE public.reader_initiate_fine_payment(
     p_user_id integer
 )
 LANGUAGE plpgsql
+SECURITY DEFINER
 AS $$
 DECLARE
     v_fine_user_id integer;
     v_is_paid boolean;
     v_payment_initiated boolean;
 BEGIN
-    -- Отримуємо дані штрафу
+    -- Отримуємо дані штрафу (SECURITY DEFINER дозволяє читати без RLS)
     SELECT l.userid, f.ispaid, (f.payment_initiated_date IS NOT NULL)
     INTO v_fine_user_id, v_is_paid, v_payment_initiated
     FROM public.fines f
@@ -1316,28 +1329,38 @@ $$;
 CREATE OR REPLACE PROCEDURE public.proc_autoorderbooks(
     p_supplier character varying DEFAULT 'Постачальник за замовчуванням',
     p_popularity_threshold float DEFAULT 0.8,
-    p_default_quantity integer DEFAULT 5
+    p_default_quantity integer DEFAULT 5,
+    p_include_new_books boolean DEFAULT true,
+    p_new_books_quantity integer DEFAULT 3,
+    p_new_books_limit integer DEFAULT 5
 )
 LANGUAGE plpgsql
 AS $$
 DECLARE
     v_order_id integer;
     v_rec RECORD;
+    v_items_count integer := 0;
 BEGIN
     -- Створюємо нове замовлення
     INSERT INTO public.orders (orderdate, supplier, status, totalprice)
     VALUES (CURRENT_DATE, p_supplier, 'Pending', 0)
     RETURNING orderid INTO v_order_id;
 
-    -- Знаходимо популярні книги
+    -- Знаходимо популярні книги (враховуємо ВСІ позики, не тільки активні)
     FOR v_rec IN
         SELECT
             pl.pricelistid,
             pl.booktitle,
             pl.price,
-            COUNT(l.loanid)::FLOAT / NULLIF(COUNT(DISTINCT b.bookid), 0)::FLOAT AS popularity
+            COUNT(l.loanid) as total_loans,
+            COUNT(DISTINCT b.bookid) as total_copies,
+            CASE
+                WHEN COUNT(DISTINCT b.bookid) > 0
+                THEN COUNT(l.loanid)::FLOAT / COUNT(DISTINCT b.bookid)::FLOAT
+                ELSE 0
+            END AS popularity
         FROM public.books b
-        LEFT JOIN public.loans l ON b.bookid = l.bookid AND l.isreturned = false
+        LEFT JOIN public.loans l ON b.bookid = l.bookid
         JOIN public.price_list pl ON b.title = pl.booktitle
         WHERE NOT EXISTS (
             SELECT 1
@@ -1352,15 +1375,69 @@ BEGIN
         INSERT INTO public.order_items (orderid, pricelistid, quantity)
         VALUES (v_order_id, v_rec.pricelistid, p_default_quantity);
 
-        RAISE NOTICE 'Added % copies of "%" to order', p_default_quantity, v_rec.booktitle;
+        v_items_count := v_items_count + 1;
+        RAISE NOTICE 'Додано % екз. популярної книги "%"', p_default_quantity, v_rec.booktitle;
     END LOOP;
 
+    -- Додаємо нові книги (книги з price_list, яких немає в БД або мають мало позик)
+    IF p_include_new_books THEN
+        FOR v_rec IN
+            SELECT
+                pl.pricelistid,
+                pl.booktitle,
+                pl.price,
+                COALESCE((
+                    SELECT COUNT(*)
+                    FROM public.books b
+                    WHERE b.title = pl.booktitle
+                ), 0) as existing_copies,
+                COALESCE((
+                    SELECT COUNT(*)
+                    FROM public.books b
+                    LEFT JOIN public.loans l ON b.bookid = l.bookid
+                    WHERE b.title = pl.booktitle
+                ), 0) as total_loans
+            FROM public.price_list pl
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM public.orders o
+                JOIN public.order_items oi ON o.orderid = oi.orderid
+                WHERE o.status IN ('Pending', 'In Progress')
+                  AND oi.pricelistid = pl.pricelistid
+            )
+            AND (
+                -- Книги, яких взагалі немає в БД
+                NOT EXISTS (
+                    SELECT 1 FROM public.books b WHERE b.title = pl.booktitle
+                )
+                OR
+                -- Книги з малою кількістю позик (менше 3)
+                (SELECT COUNT(*) FROM public.books b
+                 LEFT JOIN public.loans l ON b.bookid = l.bookid
+                 WHERE b.title = pl.booktitle) < 3
+            )
+            ORDER BY pl.pricelistid
+            LIMIT p_new_books_limit
+        LOOP
+            INSERT INTO public.order_items (orderid, pricelistid, quantity)
+            VALUES (v_order_id, v_rec.pricelistid, p_new_books_quantity);
+
+            v_items_count := v_items_count + 1;
+
+            IF v_rec.existing_copies = 0 THEN
+                RAISE NOTICE 'Додано % екз. НОВОЇ книги "%"', p_new_books_quantity, v_rec.booktitle;
+            ELSE
+                RAISE NOTICE 'Додано % екз. книги "%" (мало популярна)', p_new_books_quantity, v_rec.booktitle;
+            END IF;
+        END LOOP;
+    END IF;
+
     -- Якщо замовлення порожнє, видаляємо його
-    IF NOT EXISTS (SELECT 1 FROM public.order_items WHERE orderid = v_order_id) THEN
+    IF v_items_count = 0 THEN
         DELETE FROM public.orders WHERE orderid = v_order_id;
-        RAISE NOTICE 'No popular books found for ordering';
+        RAISE NOTICE 'Немає книг для замовлення (популярних або нових)';
     ELSE
-        RAISE NOTICE 'Order % created successfully with supplier "%"', v_order_id, p_supplier;
+        RAISE NOTICE 'Замовлення % створено з % позицій, постачальник "%"', v_order_id, v_items_count, p_supplier;
     END IF;
 END;
 $$;
@@ -1401,6 +1478,81 @@ BEGIN
     END IF;
 
     RAISE NOTICE 'Order % created successfully', v_order_id;
+END;
+$$;
+
+-- Процедура для ручного замовлення нових книг з price_list
+CREATE OR REPLACE PROCEDURE public.order_new_books_manual(
+    p_supplier VARCHAR DEFAULT 'Постачальник',
+    p_pricelistids INTEGER[] DEFAULT NULL,
+    p_default_quantity INTEGER DEFAULT 3
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_order_id INTEGER;
+    v_pricelistid INTEGER;
+    v_rec RECORD;
+    v_items_count INTEGER := 0;
+BEGIN
+    -- Створюємо нове замовлення
+    INSERT INTO public.orders (orderdate, supplier, status, totalprice)
+    VALUES (CURRENT_DATE, p_supplier, 'Pending', 0)
+    RETURNING orderid INTO v_order_id;
+
+    -- Якщо передано конкретні ID з price_list
+    IF p_pricelistids IS NOT NULL AND array_length(p_pricelistids, 1) > 0 THEN
+        FOREACH v_pricelistid IN ARRAY p_pricelistids
+        LOOP
+            -- Перевіряємо, чи існує такий запис в price_list
+            SELECT pl.pricelistid, pl.booktitle, pl.price
+            INTO v_rec
+            FROM public.price_list pl
+            WHERE pl.pricelistid = v_pricelistid;
+
+            IF FOUND THEN
+                -- Додаємо позицію до замовлення
+                INSERT INTO public.order_items (orderid, pricelistid, quantity)
+                VALUES (v_order_id, v_pricelistid, p_default_quantity);
+
+                v_items_count := v_items_count + 1;
+                RAISE NOTICE 'Додано % екз. книги "%" (ручне замовлення)', p_default_quantity, v_rec.booktitle;
+            ELSE
+                RAISE WARNING 'Price list ID % не знайдено', v_pricelistid;
+            END IF;
+        END LOOP;
+    ELSE
+        -- Якщо не передано ID, беремо всі книги з price_list, яких немає в БД
+        FOR v_rec IN
+            SELECT pl.pricelistid, pl.booktitle, pl.price
+            FROM public.price_list pl
+            WHERE NOT EXISTS (
+                SELECT 1 FROM public.books b WHERE b.title = pl.booktitle
+            )
+            AND NOT EXISTS (
+                SELECT 1
+                FROM public.orders o
+                JOIN public.order_items oi ON o.orderid = oi.orderid
+                WHERE o.status IN ('Pending', 'In Progress')
+                  AND oi.pricelistid = pl.pricelistid
+            )
+            ORDER BY pl.pricelistid
+        LOOP
+            INSERT INTO public.order_items (orderid, pricelistid, quantity)
+            VALUES (v_order_id, v_rec.pricelistid, p_default_quantity);
+
+            v_items_count := v_items_count + 1;
+            RAISE NOTICE 'Додано % екз. нової книги "%"', p_default_quantity, v_rec.booktitle;
+        END LOOP;
+    END IF;
+
+    -- Якщо немає позицій, видаляємо замовлення
+    IF v_items_count = 0 THEN
+        DELETE FROM public.orders WHERE orderid = v_order_id;
+        RAISE NOTICE 'Немає книг для замовлення';
+    ELSE
+        RAISE NOTICE 'Ручне замовлення % створено з % позицій', v_order_id, v_items_count;
+    END IF;
 END;
 $$;
 
@@ -1478,6 +1630,7 @@ GRANT EXECUTE ON PROCEDURE public.complete_reservation_by_librarian TO role_libr
 
 GRANT EXECUTE ON PROCEDURE public.proc_autoorderbooks TO role_admin;
 GRANT EXECUTE ON PROCEDURE public.create_custom_order TO role_admin, role_librarian;
+GRANT EXECUTE ON PROCEDURE public.order_new_books_manual TO role_admin, role_librarian;
 
 DO $$
 BEGIN

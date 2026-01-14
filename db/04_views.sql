@@ -53,7 +53,7 @@ SELECT
     COALESCE((
         SELECT SUM(o.totalprice)
         FROM orders o
-        WHERE o.status NOT IN ('Cancelled')
+        WHERE o.status IN ('Completed', 'In Progress')
     ), 0) AS expensesbooks,
     COALESCE((
         SELECT SUM(e.calculatedsalary)
@@ -61,7 +61,7 @@ SELECT
     ), 0) AS expensessalaries,
     (
         COALESCE((SELECT SUM(f.amount) FROM fines f WHERE f.ispaid = true), 0) -
-        COALESCE((SELECT SUM(o.totalprice) FROM orders o WHERE o.status NOT IN ('Cancelled')), 0) -
+        COALESCE((SELECT SUM(o.totalprice) FROM orders o WHERE o.status IN ('Completed', 'In Progress')), 0) -
         COALESCE((SELECT SUM(e.calculatedsalary) FROM employees e), 0)
     ) AS netbalance,
     CURRENT_DATE AS reportdate;

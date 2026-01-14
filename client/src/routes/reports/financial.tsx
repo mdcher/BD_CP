@@ -21,6 +21,14 @@ function FinancialReportPage(): React.JSX.Element {
 		);
 	}
 
+	if (!summary) {
+		return (
+			<div className="rounded-lg bg-yellow-50 p-4 text-yellow-700">
+				Фінансовий звіт поки що недоступний.
+			</div>
+		);
+	}
+
 	const stats = [
 		{
 			label: "Доходи (штрафи)",

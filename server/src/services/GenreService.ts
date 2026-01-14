@@ -5,14 +5,14 @@ export const GenreService = {
   // Отримати всі жанри
   getAll: async () => {
     const connection = getConnection();
-    const query = `SELECT * FROM public.genres ORDER BY genrename;`;
+    const query = `SELECT genreid as id, genrename FROM public.genres ORDER BY genrename;`;
     return await connection.query(query);
   },
 
   // Отримати один жанр
   getOne: async (genreId: number) => {
     const connection = getConnection();
-    const query = `SELECT * FROM public.genres WHERE genreid = $1::integer;`;
+    const query = `SELECT genreid as id, genrename FROM public.genres WHERE genreid = $1::integer;`;
     const result = await connection.query(query, [genreId]);
     if (result.length === 0) {
       throw new CustomError(404, 'General', `Genre with ID ${genreId} not found.`);
@@ -27,7 +27,7 @@ export const GenreService = {
       await connection.query('CALL public.create_genre($1::varchar, $2::integer)', [genrename, adminId]);
       // Отримуємо створений жанр
       const result = await connection.query(
-        'SELECT * FROM public.genres WHERE genrename = $1 ORDER BY genreid DESC LIMIT 1',
+        'SELECT genreid as id, genrename FROM public.genres WHERE genrename = $1 ORDER BY genreid DESC LIMIT 1',
         [genrename]
       );
       return result[0];
@@ -45,7 +45,7 @@ export const GenreService = {
     try {
       await connection.query('CALL public.update_genre($1::integer, $2::varchar, $3::integer)', [genreId, genrename, adminId]);
       // Отримуємо оновлений жанр
-      const result = await connection.query('SELECT * FROM public.genres WHERE genreid = $1', [genreId]);
+      const result = await connection.query('SELECT genreid as id, genrename FROM public.genres WHERE genreid = $1', [genreId]);
       return result[0];
     } catch (err: any) {
       if (err.message.includes('duplicate key')) {

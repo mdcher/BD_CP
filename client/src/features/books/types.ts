@@ -48,6 +48,8 @@ export interface CreateBookDto {
 	year: number;
 	location: string;
 	status: BookStatus;
+	authorIds: number[];
+	genreIds: number[];
 }
 
 export type UpdateBookDto = Partial<CreateBookDto>;

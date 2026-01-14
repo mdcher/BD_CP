@@ -17,6 +17,8 @@ export const createBookSchema = z.object({
   status: z.nativeEnum(BookStatus, {
     message: "Оберіть статус",
   }),
+  authorIds: z.array(z.number()).min(1, "Оберіть хоча б одного автора"),
+  genreIds: z.array(z.number()).min(1, "Оберіть хоча б один жанр"),
 });
 
 export const updateBookSchema = z.object({
@@ -30,4 +32,6 @@ export const updateBookSchema = z.object({
   status: z.nativeEnum(BookStatus, {
     message: "Оберіть статус",
   }).optional(),
+  authorIds: z.array(z.number()).min(1, "Оберіть хоча б одного автора").optional(),
+  genreIds: z.array(z.number()).min(1, "Оберіть хоча б один жанр").optional(),
 });

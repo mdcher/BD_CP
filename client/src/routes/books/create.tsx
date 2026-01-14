@@ -1,9 +1,11 @@
 import type * as React from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useCreateBook } from "@/features/books/booksApi";
+import { useAuthors } from "@/features/authors/authorsApi";
+import { useGenres } from "@/features/genres/genresApi";
 import {
 	LanguageEnum,
 	BookStatus,
@@ -32,17 +34,34 @@ const statusDisplay: Record<BookStatus, string> = {
 
 function CreateBookPage(): React.JSX.Element {
 	const createMutation = useCreateBook();
+	const { data: authors, isLoading: authorsLoading } = useAuthors();
+	const { data: genres, isLoading: genresLoading } = useGenres();
 
 	const {
 		register,
 		handleSubmit,
+		control,
 		formState: { errors },
 	} = useForm<CreateBookForm>({
 		resolver: zodResolver(createBookSchema),
+		defaultValues: {
+			authorIds: [],
+			genreIds: [],
+		},
 	});
 
 	const onSubmit = (data: CreateBookForm): void => {
-		createMutation.mutate({ ...data, title: data.bookTitle } as CreateBookDto);
+		const bookData: CreateBookDto = {
+			title: data.bookTitle,
+			publisher: data.publisher,
+			language: data.language,
+			year: Number(data.year),
+			location: data.location,
+			status: data.status,
+			authorIds: data.authorIds || [],
+			genreIds: data.genreIds || [],
+		};
+		createMutation.mutate(bookData);
 	};
 
 	const inputClass = "w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5";
@@ -93,6 +112,80 @@ function CreateBookPage(): React.JSX.Element {
 						<input id="location" {...register("location")} className={inputClass} />
 						{errors.location && <p className={errorClass}>{errors.location.message}</p>}
 					</div>
+				</div>
+				<div>
+					<label className={labelClass}>Автори *</label>
+					<Controller
+						name="authorIds"
+						control={control}
+						render={({ field }) => (
+							<div className="rounded-lg border border-slate-300 bg-white p-4 max-h-[200px] overflow-y-auto">
+								{authorsLoading ? (
+									<p className="text-sm text-slate-500">Завантаження...</p>
+								) : (
+									<div className="space-y-2">
+										{authors?.map(author => (
+											<label key={author.id} className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-2 rounded">
+												<input
+													type="checkbox"
+													value={author.id}
+													checked={field.value?.includes(author.id) || false}
+													onChange={(e) => {
+														const value = Number(e.target.value);
+														const currentValue = field.value || [];
+														const newValue = e.target.checked
+															? [...currentValue, value]
+															: currentValue.filter(id => id !== value);
+														field.onChange(newValue);
+													}}
+													className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+												/>
+												<span className="text-sm">{author.fullname}</span>
+											</label>
+										))}
+									</div>
+								)}
+							</div>
+						)}
+					/>
+					{errors.authorIds && <p className={errorClass}>{errors.authorIds.message}</p>}
+				</div>
+				<div>
+					<label className={labelClass}>Жанри *</label>
+					<Controller
+						name="genreIds"
+						control={control}
+						render={({ field }) => (
+							<div className="rounded-lg border border-slate-300 bg-white p-4 max-h-[200px] overflow-y-auto">
+								{genresLoading ? (
+									<p className="text-sm text-slate-500">Завантаження...</p>
+								) : (
+									<div className="space-y-2">
+										{genres?.map(genre => (
+											<label key={genre.id} className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-2 rounded">
+												<input
+													type="checkbox"
+													value={genre.id}
+													checked={field.value?.includes(genre.id) || false}
+													onChange={(e) => {
+														const value = Number(e.target.value);
+														const currentValue = field.value || [];
+														const newValue = e.target.checked
+															? [...currentValue, value]
+															: currentValue.filter(id => id !== value);
+														field.onChange(newValue);
+													}}
+													className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+												/>
+												<span className="text-sm">{genre.genrename}</span>
+											</label>
+										))}
+									</div>
+								)}
+							</div>
+						)}
+					/>
+					{errors.genreIds && <p className={errorClass}>{errors.genreIds.message}</p>}
 				</div>
 				<div className="pt-4">
 					<button type="submit" className="w-full rounded-lg bg-indigo-600 px-4 py-3 text-white" disabled={createMutation.isPending}>
