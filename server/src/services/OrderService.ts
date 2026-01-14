@@ -2,7 +2,7 @@ import { getConnection } from 'typeorm';
 import { CustomError } from '../utils/response/custom-error/CustomError';
 
 interface OrderItemData {
-  orderbookid: number;
+  pricelistid: number;
   quantity: number;
 }
 
@@ -29,18 +29,16 @@ export const OrderService = {
       throw new CustomError(404, 'General', `Order with ID ${orderId} not found.`);
     }
 
-    // Отримати позиції замовлення
+    // Отримати позиції замовлення (ВИПРАВЛЕНО: використовуємо price_list)
     const itemsQuery = `
       SELECT
-        oi.orderbookid,
-        ob.title,
-        ob.author,
-        ob.genre,
-        ob.unitprice,
+        oi.pricelistid,
+        pl.booktitle as title,
+        pl.price as unitprice,
         oi.quantity,
-        (oi.quantity * ob.unitprice) as subtotal
+        (oi.quantity * pl.price) as subtotal
       FROM public.order_items oi
-      JOIN public.order_books ob ON oi.orderbookid = ob.orderbookid
+      JOIN public.price_list pl ON oi.pricelistid = pl.pricelistid
       WHERE oi.orderid = $1::integer;
     `;
     const items = await connection.query(itemsQuery, [orderId]);
@@ -51,30 +49,36 @@ export const OrderService = {
     };
   },
 
-  // Створити нове замовлення
+  // Створити нове замовлення (використовуємо процедуру БД)
   create: async (supplier: string, items: OrderItemData[]) => {
     const connection = getConnection();
+    try {
+      // Конвертуємо items в JSONB формат
+      const itemsJson = JSON.stringify(items);
 
-    // Створюємо замовлення
-    const createOrderQuery = `
-      INSERT INTO public.orders (orderdate, supplier, status, totalcost)
-      VALUES (CURRENT_DATE, $1::varchar, 'Created', 0)
-      RETURNING orderid;
-    `;
-    const result = await connection.query(createOrderQuery, [supplier]);
-    const orderId = result[0].orderid;
-
-    // Додаємо позиції
-    for (const item of items) {
+      // Викликаємо процедуру create_custom_order з БД
       await connection.query(
-        `INSERT INTO public.order_items (orderid, orderbookid, quantity)
-         VALUES ($1::integer, $2::integer, $3::integer)`,
-        [orderId, item.orderbookid, item.quantity]
+        'CALL public.create_custom_order($1::varchar, $2::jsonb)',
+        [supplier, itemsJson]
       );
-    }
 
-    // Повертаємо повне замовлення
-    return await OrderService.getOne(orderId);
+      // Знаходимо щойно створене замовлення
+      const latestOrderQuery = `
+        SELECT * FROM public.orders
+        WHERE supplier = $1::varchar
+        ORDER BY orderid DESC
+        LIMIT 1;
+      `;
+      const orders = await connection.query(latestOrderQuery, [supplier]);
+
+      if (orders.length === 0) {
+        throw new CustomError(404, 'General', 'Failed to retrieve created order.');
+      }
+
+      return await OrderService.getOne(orders[0].orderid);
+    } catch (err: any) {
+      throw new CustomError(400, 'Raw', 'Order creation failed', [err.message]);
+    }
   },
 
   // Оновити статус замовлення
@@ -125,36 +129,61 @@ export const OrderService = {
     }
   },
 
-  // Отримати прайс-лист (order_books)
+  // Створити замовлення на вибрані книги (НОВЕ: для замовлення нових книг)
+  createCustomOrder: async (supplier: string, items: { pricelistid: number; quantity: number }[]) => {
+    const connection = getConnection();
+
+    try {
+      // Конвертуємо items в JSONB формат
+      const itemsJson = JSON.stringify(items);
+
+      // Викликаємо процедуру з БД
+      await connection.query(
+        `CALL public.create_custom_order($1::varchar, $2::jsonb)`,
+        [supplier, itemsJson]
+      );
+
+      // Знаходимо щойно створене замовлення
+      const latestOrderQuery = `
+        SELECT * FROM public.orders
+        WHERE supplier = $1::varchar
+        ORDER BY orderid DESC
+        LIMIT 1;
+      `;
+      const orders = await connection.query(latestOrderQuery, [supplier]);
+
+      if (orders.length === 0) {
+        throw new CustomError(404, 'General', 'Failed to create custom order.');
+      }
+
+      return await OrderService.getOne(orders[0].orderid);
+    } catch (err: any) {
+      throw new CustomError(400, 'Raw', 'Custom order creation failed.', [err.message]);
+    }
+  },
+
+  // Отримати прайс-лист (ВИПРАВЛЕНО: використовуємо price_list)
   getPriceList: async () => {
     const connection = getConnection();
-    const query = `SELECT * FROM public.order_books ORDER BY title;`;
+    const query = `SELECT * FROM public.price_list ORDER BY booktitle;`;
     return await connection.query(query);
   },
 
-  // Додати книгу до прайс-листу
+  // Додати книгу до прайс-листу (ВИПРАВЛЕНО: використовуємо price_list)
   addToPriceList: async (data: {
-    title: string;
-    author: string;
-    genre: string;
-    language: string;
-    publisher: string;
-    unitprice: number;
+    booktitle: string;
+    price: number;
   }) => {
     const connection = getConnection();
     const query = `
-      INSERT INTO public.order_books (title, author, genre, language, publisher, unitprice)
-      VALUES ($1::varchar, $2::varchar, $3::varchar, $4::public.language_enum, $5::varchar, $6::numeric)
+      INSERT INTO public.price_list (booktitle, price)
+      VALUES ($1::varchar, $2::numeric)
       RETURNING *;
     `;
     try {
       const result = await connection.query(query, [
-        data.title,
-        data.author,
-        data.genre,
-        data.language,
-        data.publisher,
-        data.unitprice,
+        data.booktitle,
+        data.price,
       ]);
       return result[0];
     } catch (err: any) {

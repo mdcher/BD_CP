@@ -53,7 +53,7 @@ SELECT
     COALESCE((
         SELECT SUM(o.totalprice)
         FROM orders o
-        WHERE o.status <> 'Cancelled'
+        WHERE o.status NOT IN ('Cancelled')
     ), 0) AS expensesbooks,
     COALESCE((
         SELECT SUM(e.calculatedsalary)
@@ -61,7 +61,7 @@ SELECT
     ), 0) AS expensessalaries,
     (
         COALESCE((SELECT SUM(f.amount) FROM fines f WHERE f.ispaid = true), 0) -
-        COALESCE((SELECT SUM(o.totalprice) FROM orders o WHERE o.status <> 'Cancelled'), 0) -
+        COALESCE((SELECT SUM(o.totalprice) FROM orders o WHERE o.status NOT IN ('Cancelled')), 0) -
         COALESCE((SELECT SUM(e.calculatedsalary) FROM employees e), 0)
     ) AS netbalance,
     CURRENT_DATE AS reportdate;
@@ -396,6 +396,23 @@ GROUP BY o.orderid, o.orderdate, o.supplier, o.status, o.totalprice
 ORDER BY o.orderdate DESC;
 
 
+CREATE OR REPLACE VIEW public.view_employees_detailed AS
+SELECT
+    e.employeeid,
+    u.userid,
+    u.fullname,
+    u.contactinfo,
+    u.role,
+    e.position,
+    e.salaryrate,
+    e.workedhours,
+    e.calculatedsalary,
+    u.dateofbirth
+FROM public.employees e
+JOIN public.users u ON e.userid = u.userid
+ORDER BY e.employeeid;
+
+
 GRANT SELECT ON public.view_active_debtors TO role_librarian, role_admin;
 GRANT SELECT ON public.view_catalog_extended TO role_reader, role_librarian, role_admin;
 GRANT SELECT ON public.view_financial_summary TO role_accountant, role_admin;
@@ -416,9 +433,9 @@ GRANT SELECT ON public.view_user_activity_stats TO role_admin, role_librarian;
 GRANT SELECT ON public.view_pending_fine_payments TO role_accountant, role_admin;
 GRANT SELECT ON public.view_pending_reservations TO role_librarian, role_admin;
 GRANT SELECT ON public.view_orders_detailed TO role_admin, role_accountant;
+GRANT SELECT ON public.view_employees_detailed TO role_admin, role_accountant;
 
 DO $$
 BEGIN
-    RAISE NOTICE 'Представлення (views) успішно створено!';
-    RAISE NOTICE 'Рейтинг авторів переписано з використанням WITH clause';
+    RAISE NOTICE '✅ Представлення (views) успішно створено!';
 END $$;

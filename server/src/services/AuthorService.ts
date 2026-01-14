@@ -20,50 +20,43 @@ export const AuthorService = {
     return result[0];
   },
 
-  // Створити автора
-  create: async (fullname: string) => {
+  // Створити автора (ОНОВЛЕНО: використовуємо процедуру з БД)
+  create: async (fullname: string, adminId: number = 1) => {
     const connection = getConnection();
-    const query = `
-      INSERT INTO public.authors (fullname)
-      VALUES ($1::varchar)
-      RETURNING authorid, fullname;
-    `;
     try {
-      const result = await connection.query(query, [fullname]);
+      await connection.query('CALL public.create_author($1::varchar, $2::integer)', [fullname, adminId]);
+      // Отримуємо створеного автора
+      const result = await connection.query(
+        'SELECT * FROM public.authors WHERE fullname = $1 ORDER BY authorid DESC LIMIT 1',
+        [fullname]
+      );
       return result[0];
     } catch (err: any) {
       throw new CustomError(400, 'Raw', 'Failed to create author.', [err.message]);
     }
   },
 
-  // Оновити автора
-  update: async (authorId: number, fullname: string) => {
+  // Оновити автора (ОНОВЛЕНО: використовуємо процедуру з БД)
+  update: async (authorId: number, fullname: string, adminId: number = 1) => {
     const connection = getConnection();
-    const query = `
-      UPDATE public.authors
-      SET fullname = $1::varchar
-      WHERE authorid = $2::integer
-      RETURNING authorid, fullname;
-    `;
-    const result = await connection.query(query, [fullname, authorId]);
-    if (result[0].length === 0) {
-      throw new CustomError(404, 'General', `Author with ID ${authorId} not found.`);
+    try {
+      await connection.query('CALL public.update_author($1::integer, $2::varchar, $3::integer)', [authorId, fullname, adminId]);
+      // Отримуємо оновленого автора
+      const result = await connection.query('SELECT * FROM public.authors WHERE authorid = $1', [authorId]);
+      return result[0];
+    } catch (err: any) {
+      throw new CustomError(400, 'Raw', 'Failed to update author.', [err.message]);
     }
-    return result[0];
   },
 
-  // Видалити автора
-  delete: async (authorId: number) => {
+  // Видалити автора (ОНОВЛЕНО: використовуємо процедуру з БД)
+  delete: async (authorId: number, adminId: number = 1) => {
     const connection = getConnection();
-    const query = `
-      DELETE FROM public.authors
-      WHERE authorid = $1::integer
-      RETURNING authorid;
-    `;
-    const result = await connection.query(query, [authorId]);
-    if (result[1] === 0) {
-      throw new CustomError(404, 'General', `Author with ID ${authorId} not found.`);
+    try {
+      await connection.query('CALL public.delete_author($1::integer, $2::integer)', [authorId, adminId]);
+      return { authorId, deleted: true };
+    } catch (err: any) {
+      throw new CustomError(400, 'Raw', 'Failed to delete author.', [err.message]);
     }
-    return { authorId, deleted: true };
   },
 };

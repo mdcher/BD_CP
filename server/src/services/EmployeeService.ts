@@ -3,22 +3,10 @@ import { CustomError } from '../utils/response/custom-error/CustomError';
 
 export const EmployeeService = {
   // Отримати всіх співробітників з розрахованою зарплатою
+  // ОНОВЛЕНО: Використовуємо view_employees_detailed
   getAll: async () => {
     const connection = getConnection();
-    const query = `
-      SELECT
-        e.employeeid,
-        e.userid,
-        u.fullname,
-        u.contactinfo,
-        e.position,
-        e.salaryrate,
-        e.workedhours,
-        e.calculatedsalary
-      FROM public.employees e
-      JOIN public.users u ON e.userid = u.userid
-      ORDER BY e.employeeid;
-    `;
+    const query = `SELECT * FROM public.view_employees_detailed ORDER BY employeeid;`;
     return await connection.query(query);
   },
 

@@ -20,16 +20,16 @@ export const GenreService = {
     return result[0];
   },
 
-  // Створити жанр
-  create: async (genrename: string) => {
+  // Створити жанр (ОНОВЛЕНО: використовуємо процедуру з БД)
+  create: async (genrename: string, adminId: number = 1) => {
     const connection = getConnection();
-    const query = `
-      INSERT INTO public.genres (genrename)
-      VALUES ($1::varchar)
-      RETURNING genreid, genrename;
-    `;
     try {
-      const result = await connection.query(query, [genrename]);
+      await connection.query('CALL public.create_genre($1::varchar, $2::integer)', [genrename, adminId]);
+      // Отримуємо створений жанр
+      const result = await connection.query(
+        'SELECT * FROM public.genres WHERE genrename = $1 ORDER BY genreid DESC LIMIT 1',
+        [genrename]
+      );
       return result[0];
     } catch (err: any) {
       if (err.message.includes('duplicate key')) {
@@ -39,20 +39,13 @@ export const GenreService = {
     }
   },
 
-  // Оновити жанр
-  update: async (genreId: number, genrename: string) => {
+  // Оновити жанр (ОНОВЛЕНО: використовуємо процедуру з БД)
+  update: async (genreId: number, genrename: string, adminId: number = 1) => {
     const connection = getConnection();
-    const query = `
-      UPDATE public.genres
-      SET genrename = $1::varchar
-      WHERE genreid = $2::integer
-      RETURNING genreid, genrename;
-    `;
     try {
-      const result = await connection.query(query, [genrename, genreId]);
-      if (result[0].length === 0) {
-        throw new CustomError(404, 'General', `Genre with ID ${genreId} not found.`);
-      }
+      await connection.query('CALL public.update_genre($1::integer, $2::varchar, $3::integer)', [genreId, genrename, adminId]);
+      // Отримуємо оновлений жанр
+      const result = await connection.query('SELECT * FROM public.genres WHERE genreid = $1', [genreId]);
       return result[0];
     } catch (err: any) {
       if (err.message.includes('duplicate key')) {
@@ -62,18 +55,14 @@ export const GenreService = {
     }
   },
 
-  // Видалити жанр
-  delete: async (genreId: number) => {
+  // Видалити жанр (ОНОВЛЕНО: використовуємо процедуру з БД)
+  delete: async (genreId: number, adminId: number = 1) => {
     const connection = getConnection();
-    const query = `
-      DELETE FROM public.genres
-      WHERE genreid = $1::integer
-      RETURNING genreid;
-    `;
-    const result = await connection.query(query, [genreId]);
-    if (result[1] === 0) {
-      throw new CustomError(404, 'General', `Genre with ID ${genreId} not found.`);
+    try {
+      await connection.query('CALL public.delete_genre($1::integer, $2::integer)', [genreId, adminId]);
+      return { genreId, deleted: true };
+    } catch (err: any) {
+      throw new CustomError(400, 'Raw', 'Failed to delete genre.', [err.message]);
     }
-    return { genreId, deleted: true };
   },
 };

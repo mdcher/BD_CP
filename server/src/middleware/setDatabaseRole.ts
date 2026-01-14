@@ -30,7 +30,8 @@ export const setDatabaseRole = async (req: Request, res: Response, next: NextFun
         }
 
         // Встановлюємо session variable для user_id (для RLS політик)
-        // Використовуємо SET без LOCAL - це буде діяти до кінця сесії/з'єднання
+        // Примітка: SET команда не підтримує параметризовані запити,
+        // але userId вже валідовано JWT токеном, тому це безпечно
         if (userId) {
             await connection.query(`SET "app.current_user_id" = '${userId}'`);
         } else {

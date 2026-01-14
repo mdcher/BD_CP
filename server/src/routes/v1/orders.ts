@@ -31,6 +31,13 @@ orderRouter.post(
   OrderController.autoOrder
 );
 
+// Альяс для auto-order (для зворотної сумісності)
+orderRouter.post(
+  '/auto',
+  [checkJwt, checkRole([UserRole.Librarian, UserRole.Admin])],
+  OrderController.autoOrder
+);
+
 // Отримати всі замовлення
 orderRouter.get(
   '/',

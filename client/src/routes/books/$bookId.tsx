@@ -1,4 +1,4 @@
-import type * as React from "react";
+import React, { useEffect } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -46,7 +46,7 @@ function EditBookPage(): React.JSX.Element {
 	});
 
 	// Заповнити форму даними книги після завантаження
-	React.useEffect(() => {
+	useEffect(() => {
 		if (book) {
 			reset({
 				bookTitle: book.title,

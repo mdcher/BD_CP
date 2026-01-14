@@ -16,12 +16,17 @@ export const LoanService = {
   },
 
   // Повернення книги (викликаємо процедуру return_book)
-  returnBook: async (loanId: number, librarianId: number) => {
+  // ОНОВЛЕНО: Додано параметр bookCondition для запису стану книги
+  returnBook: async (loanId: number, librarianId: number, bookCondition?: string) => {
     const connection = getConnection();
     try {
       // Процедура сама оновить статус і нарахує штраф, якщо потрібно
-      // Процедура приймає тільки один параметр: p_loan_id
-      await connection.query('CALL public.return_book($1::integer)', [loanId]);
+      // Параметри: p_loan_id, p_book_condition
+      if (bookCondition) {
+        await connection.query('CALL public.return_book($1::integer, $2::public.book_status_enum)', [loanId, bookCondition]);
+      } else {
+        await connection.query('CALL public.return_book($1::integer, NULL)', [loanId]);
+      }
       return { message: 'Book returned successfully.' };
     } catch (err: any) {
       throw new CustomError(400, 'Raw', 'Return book failed', [err.message]);

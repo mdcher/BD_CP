@@ -169,9 +169,32 @@ CREATE INDEX idx_reservations_iscompleted ON public.reservations(iscompleted);
 CREATE INDEX idx_book_authors_authorid ON public.book_authors(authorid);
 CREATE INDEX idx_book_genres_genreid ON public.book_genres(genreid);
 
+-- Додаткові оптимізаційні індекси
+CREATE INDEX idx_fines_unpaid ON public.fines(ispaid, issuedate) WHERE ispaid = false;
+CREATE INDEX idx_reservations_active ON public.reservations(iscompleted, isconfirmed);
+CREATE INDEX idx_loans_active ON public.loans(isreturned, duedate) WHERE isreturned = false;
+CREATE INDEX idx_orders_status ON public.orders(status);
+
+-- Таблиця аудит логування
+CREATE TABLE public.audit_log (
+    auditid SERIAL PRIMARY KEY,
+    userid INTEGER REFERENCES public.users(userid),
+    action VARCHAR(100) NOT NULL,
+    tablename VARCHAR(50),
+    recordid INTEGER,
+    old_values JSONB,
+    new_values JSONB,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_audit_userid ON public.audit_log(userid);
+CREATE INDEX idx_audit_timestamp ON public.audit_log(timestamp);
+CREATE INDEX idx_audit_action ON public.audit_log(action);
+
 COMMENT ON TABLE public.users IS 'Користувачі системи (читачі та персонал)';
 COMMENT ON TABLE public.books IS 'Книги в бібліотеці';
 COMMENT ON TABLE public.loans IS 'Видачі книг користувачам';
 COMMENT ON TABLE public.fines IS 'Штрафи за прострочені книги';
 COMMENT ON TABLE public.reservations IS 'Резервації книг користувачами';
 COMMENT ON TABLE public.employees IS 'Інформація про співробітників';
+COMMENT ON TABLE public.audit_log IS 'Журнал аудиту дій користувачів';

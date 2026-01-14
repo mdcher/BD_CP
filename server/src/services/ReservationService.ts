@@ -10,16 +10,14 @@ export const ReservationService = {
   // Створити нове бронювання
   create: async (data: ReservationData) => {
     const connection = getConnection();
-    // База даних сама перевірить доступність книги за допомогою тригера
-    // Бронювання очікує підтвердження бібліотекаря (isconfirmed=false, pickupdate=NULL)
-    const query = `
-      INSERT INTO public.reservations (bookid, userid, reservationdate, iscompleted, isconfirmed)
-      VALUES ($1::integer, $2::integer, CURRENT_DATE, false, false)
-      RETURNING reservationid, reservationdate;
-    `;
+    // Викликаємо процедуру БД для створення бронювання
+    // Тригер автоматично перевірить доступність книги
     try {
-      const result = await connection.query(query, [data.bookId, data.userId]);
-      return result[0];
+      await connection.query(
+        'CALL public.create_reservation($1::integer, $2::integer)',
+        [data.bookId, data.userId]
+      );
+      return { message: 'Reservation created successfully.' };
     } catch (dbError: any) {
       // Перехоплюємо помилку з бази даних (напр., "Всі примірники зайняті")
       throw new CustomError(409, 'Raw', dbError.message, [dbError.message]);
@@ -51,36 +49,32 @@ export const ReservationService = {
     return await connection.query(query);
   },
 
-  // Скасувати бронювання (видаляємо запис)
+  // Скасувати бронювання (викликаємо процедуру БД)
   cancel: async (reservationId: number, userId: number) => {
     const connection = getConnection();
-    // RLS політика в базі даних не дозволить користувачу скасувати чуже бронювання
-    const query = `
-      DELETE FROM public.reservations
-      WHERE reservationid = $1::integer AND userid = $2::integer AND iscompleted = false
-      RETURNING reservationid;
-    `;
-    const result = await connection.query(query, [reservationId, userId]);
-    if (result.length === 0) {
-        throw new CustomError(404, 'General', 'Active reservation not found or you do not have permission to cancel it.');
+    try {
+      await connection.query(
+        'CALL public.cancel_reservation($1::integer, $2::integer)',
+        [reservationId, userId]
+      );
+      return { reservationId, status: 'Cancelled' };
+    } catch (dbError: any) {
+      throw new CustomError(404, 'Raw', dbError.message, [dbError.message]);
     }
-    return { reservationId, status: 'Cancelled' };
   },
 
   // Завершити бронювання (для бібліотекарів - коли користувач забрав книгу)
-  complete: async (reservationId: number) => {
+  complete: async (reservationId: number, librarianId: number = 1) => {
     const connection = getConnection();
-    const query = `
-      UPDATE public.reservations
-      SET iscompleted = true
-      WHERE reservationid = $1::integer AND isconfirmed = true AND iscompleted = false
-      RETURNING reservationid, userid, bookid;
-    `;
-    const result = await connection.query(query, [reservationId]);
-    if (result.length === 0) {
-      throw new CustomError(404, 'General', 'Confirmed reservation not found.');
+    try {
+      await connection.query(
+        'CALL public.complete_reservation_by_librarian($1::integer, $2::integer)',
+        [reservationId, librarianId]
+      );
+      return { message: 'Reservation completed successfully.' };
+    } catch (dbError: any) {
+      throw new CustomError(404, 'Raw', dbError.message, [dbError.message]);
     }
-    return result[0];
   },
 
   // Отримати всі активні бронювання (для бібліотекарів)

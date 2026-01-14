@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { getConnection } from 'typeorm';
-import * as bcrypt from 'bcryptjs';
+import { getConnection, createConnection } from 'typeorm';
 import { JwtPayload } from '../../types/JwtPayload';
 import { createJwtToken } from '../../utils/createJwtToken';
 import { CustomError } from '../../utils/response/custom-error/CustomError';
@@ -13,12 +12,11 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
         const connection = getConnection();
 
-        // ПРОСТИЙ І НАДІЙНИЙ ПІДХІД: SELECT з явним schema public
+        // Викликаємо функцію login в БД для отримання інформації про користувача
         const users = await connection.query(
-            `SELECT userid, fullname, contactinfo, role::varchar as role, password_hash
-             FROM public.users
-             WHERE contactinfo = $1`,
-            [contactInfo]
+            `SELECT userid, fullname, contactinfo, role::varchar as role, isblocked, db_username
+             FROM public.login($1, $2)`,
+            [contactInfo, password]
         );
 
         if (!users || users.length === 0) {
@@ -26,13 +24,43 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         }
 
         const user = users[0];
-        console.log('✅ User found:', { userid: user.userid, role: user.role });
+        console.log('✅ User found:', { userid: user.userid, role: user.role, db_user: user.db_username });
 
-        // Перевіряємо пароль
-        const isPasswordMatch = await bcrypt.compare(password, user.password_hash);
+        // Перевіряємо, чи користувач заблокований
+        if (user.isblocked) {
+            throw new CustomError(403, 'Forbidden', 'User is blocked', ['Your account has been blocked.']);
+        }
 
-        if (!isPasswordMatch) {
-            throw new CustomError(401, 'Unauthorized', 'Incorrect email or password', ['Password mismatch.']);
+        // Перевіряємо автентифікацію через спробу підключення з DB credentials
+        if (user.db_username) {
+            try {
+                // Намагаємось підключитись як цей DB користувач
+                const testConnection = await createConnection({
+                    name: `test_${user.db_username}_${Date.now()}`,
+                    type: 'postgres',
+                    host: process.env.POSTGRES_HOST || 'localhost',
+                    port: parseInt(process.env.POSTGRES_PORT || '5432'),
+                    username: user.db_username,
+                    password: password,
+                    database: process.env.POSTGRES_DB || 'library_db',
+                    synchronize: false,
+                    logging: false,
+                });
+
+                // Якщо підключення успішне, закриваємо його
+                await testConnection.close();
+                console.log('✅ DB authentication successful for:', user.db_username);
+
+            } catch (authError: any) {
+                console.error('❌ DB authentication failed:', authError.message);
+                throw new CustomError(401, 'Unauthorized', 'Incorrect email or password', ['Invalid credentials.']);
+            }
+        } else {
+            // Якщо db_username відсутній, користувач потребує міграції
+            console.warn('⚠️ User needs migration:', contactInfo);
+            throw new CustomError(403, 'Forbidden', 'Account migration required', [
+                'Your account needs to be migrated. Please contact administrator.'
+            ]);
         }
 
         const jwtPayload: JwtPayload = {
