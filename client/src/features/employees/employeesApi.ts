@@ -11,17 +11,17 @@ import apiClient from "@/lib/axios";
 import type { Employee, CreateEmployeeDto, UpdateEmployeeDto } from "./types";
 
 const getEmployees = async (): Promise<Array<Employee>> => {
-	const response = await apiClient.get<{ message: string; data: Array<Employee> }>("/employees");
+	const response = await apiClient.get<Array<Employee>>("/employees");
 	return response.data;
 };
 
 const getEmployeeById = async (id: string): Promise<Employee> => {
-	const response = await apiClient.get<{ message: string; data: Employee }>(`/employees/${id}`);
+	const response = await apiClient.get<Employee>(`/employees/${id}`);
 	return response.data;
 };
 
 const createEmployee = async (data: CreateEmployeeDto): Promise<Employee> => {
-	const response = await apiClient.post<{ message: string; data: Employee }>("/employees", data);
+	const response = await apiClient.post<Employee>("/employees", data);
 	return response.data;
 };
 
@@ -32,7 +32,7 @@ const updateEmployee = async ({
 	id: string;
 	data: UpdateEmployeeDto;
 }): Promise<Employee> => {
-	const response = await apiClient.put<{ message: string; data: Employee }>(`/employees/${id}`, data);
+	const response = await apiClient.put<Employee>(`/employees/${id}`, data);
 	return response.data;
 };
 

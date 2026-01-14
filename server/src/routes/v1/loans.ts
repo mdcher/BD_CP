@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { issue, returnBook, myHistory } from '../../controllers/LoanController';
+import { issue, returnBook, myHistory, markAsLost } from '../../controllers/LoanController';
 import { checkJwt } from '../../middleware/checkJwt';
 import { checkRole } from '../../middleware/checkRole';
 import { setDatabaseRole } from '../../middleware/setDatabaseRole';
@@ -15,6 +15,9 @@ loanRouter.post('/', [checkJwt, checkRole([UserRole.Librarian, UserRole.Admin])]
 
 // Повернути книгу (доступ: Бібліотекар, Адмін)
 loanRouter.post('/:id/return', [checkJwt, checkRole([UserRole.Librarian, UserRole.Admin])], returnBook);
+
+// Позначити книгу як втрачену (доступ: Бібліотекар, Адмін)
+loanRouter.post('/:id/mark-as-lost', [checkJwt, checkRole([UserRole.Librarian, UserRole.Admin])], markAsLost);
 
 // Моя історія (доступ: Будь-який авторизований юзер)
 loanRouter.get('/my', [checkJwt], myHistory);

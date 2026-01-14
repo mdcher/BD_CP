@@ -14,14 +14,14 @@ import orderRouter from './orders';
 
 const v1Router = Router();
 
-// Маршрут автентифікації залишається публічним (без authMiddleware)
+// Публічні маршрути (доступні без автентифікації)
 v1Router.use('/auth', authRouter);
+v1Router.use('/books', bookRouter); // Каталог книг доступний гостям
 
-// Всі наступні маршрути будуть захищені
+// Всі наступні маршрути будуть захищені (потребують автентифікації)
 v1Router.use(authMiddleware);
 
 v1Router.use('/users', userRouter);
-v1Router.use('/books', bookRouter);
 v1Router.use('/authors', authorRouter);
 v1Router.use('/genres', genreRouter);
 v1Router.use('/loans', loanRouter);

@@ -11,17 +11,17 @@ import apiClient from "@/lib/axios";
 import type { Author, CreateAuthorDto, UpdateAuthorDto } from "./types";
 
 const getAuthors = async (): Promise<Array<Author>> => {
-	const response = await apiClient.get<{ message: string; data: Array<Author> }>("/authors");
+	const response = await apiClient.get<Array<Author>>("/authors");
 	return response.data;
 };
 
 const getAuthorById = async (id: string): Promise<Author> => {
-	const response = await apiClient.get<{ message: string; data: Author }>(`/authors/${id}`);
+	const response = await apiClient.get<Author>(`/authors/${id}`);
 	return response.data;
 };
 
 const createAuthor = async (data: CreateAuthorDto): Promise<Author> => {
-	const response = await apiClient.post<{ message: string; data: Author }>("/authors", data);
+	const response = await apiClient.post<Author>("/authors", data);
 	return response.data;
 };
 
@@ -32,7 +32,7 @@ const updateAuthor = async ({
 	id: string;
 	data: UpdateAuthorDto;
 }): Promise<Author> => {
-	const response = await apiClient.put<{ message: string; data: Author }>(`/authors/${id}`, data);
+	const response = await apiClient.put<Author>(`/authors/${id}`, data);
 	return response.data;
 };
 

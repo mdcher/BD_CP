@@ -1,23 +1,10 @@
--- ============================================================================
--- ФАЙЛ 2: ЗАПОВНЕННЯ ТЕСТОВИМИ ДАНИМИ
--- Опис: Початкові дані для тестування системи
--- ============================================================================
-
 SET client_encoding = 'UTF8';
-
--- ============================================================================
--- ТИПИ ПОРУШЕНЬ
--- ============================================================================
 
 INSERT INTO public.violation_types (name, cost) VALUES
 ('Прострочення повернення книги', 5.00),
 ('Пошкодження книги', 50.00),
 ('Втрата книги', 200.00),
 ('Порушення правил бібліотеки', 25.00);
-
--- ============================================================================
--- ЖАНРИ
--- ============================================================================
 
 INSERT INTO public.genres (genrename) VALUES
 ('Фантастика'),
@@ -30,10 +17,6 @@ INSERT INTO public.genres (genrename) VALUES
 ('Філософія'),
 ('Пригоди'),
 ('Драма');
-
--- ============================================================================
--- АВТОРИ
--- ============================================================================
 
 INSERT INTO public.authors (fullname) VALUES
 ('Тарас Шевченко'),
@@ -57,46 +40,29 @@ INSERT INTO public.authors (fullname) VALUES
 ('Agatha Christie'),
 ('Dan Brown');
 
--- ============================================================================
--- КОРИСТУВАЧІ (з хешованими паролями)
--- Пароль для всіх: "password123"
--- Хеш bcrypt: $2a$10$rO7W6H9mF8pPzR1tO5xUy.kL8xNZqN3YvJZQXH8vL2Kw7xR9yH8mO
--- ============================================================================
-
--- Читачі
+-- Пароль для всіх тестових користувачів: password123
 INSERT INTO public.users (fullname, role, dateofbirth, contactinfo, password_hash) VALUES
-('Іван Іванов', 'Reader', '1995-05-15', 'ivan@mail.com', '$2a$10$XEZGxq3v3qN6KvZ1Y7xZJ.rF7vO5WqN3YvJZQXH8vL2Kw7xR9yH8mO'),
-('Марія Петренко', 'Reader', '1998-08-20', 'maria@mail.com', '$2a$10$XEZGxq3v3qN6KvZ1Y7xZJ.rF7vO5WqN3YvJZQXH8vL2Kw7xR9yH8mO'),
-('Петро Сидоренко', 'Reader', '1992-03-10', 'petro@mail.com', '$2a$10$XEZGxq3v3qN6KvZ1Y7xZJ.rF7vO5WqN3YvJZQXH8vL2Kw7xR9yH8mO'),
-('Оксана Коваль', 'Reader', '2000-11-25', 'oksana@mail.com', '$2a$10$XEZGxq3v3qN6KvZ1Y7xZJ.rF7vO5WqN3YvJZQXH8vL2Kw7xR9yH8mO'),
-('Андрій Мельник', 'Reader', '1997-07-30', 'andriy@mail.com', '$2a$10$XEZGxq3v3qN6KvZ1Y7xZJ.rF7vO5WqN3YvJZQXH8vL2Kw7xR9yH8mO');
+('Іван Іванов', 'Reader', '1995-05-15', 'ivan@mail.com', '$2a$10$gs12d4QKQ4vv8lWlKAIEAusoZ9M4.W9Nd051j0q4iSOTsOQM77.4a'),
+('Марія Петренко', 'Reader', '1998-08-20', 'maria@mail.com', '$2a$10$gs12d4QKQ4vv8lWlKAIEAusoZ9M4.W9Nd051j0q4iSOTsOQM77.4a'),
+('Петро Сидоренко', 'Reader', '1992-03-10', 'petro@mail.com', '$2a$10$gs12d4QKQ4vv8lWlKAIEAusoZ9M4.W9Nd051j0q4iSOTsOQM77.4a'),
+('Оксана Коваль', 'Reader', '2000-11-25', 'oksana@mail.com', '$2a$10$gs12d4QKQ4vv8lWlKAIEAusoZ9M4.W9Nd051j0q4iSOTsOQM77.4a'),
+('Андрій Мельник', 'Reader', '1997-07-30', 'andriy@mail.com', '$2a$10$gs12d4QKQ4vv8lWlKAIEAusoZ9M4.W9Nd051j0q4iSOTsOQM77.4a');
 
--- Бібліотекарі
 INSERT INTO public.users (fullname, role, dateofbirth, contactinfo, password_hash) VALUES
-('Олена Бібліотекар', 'Librarian', '1985-04-12', 'librarian@mail.com', '$2a$10$XEZGxq3v3qN6KvZ1Y7xZJ.rF7vO5WqN3YvJZQXH8vL2Kw7xR9yH8mO'),
-('Сергій Книжник', 'Librarian', '1988-09-05', 'librarian2@mail.com', '$2a$10$XEZGxq3v3qN6KvZ1Y7xZJ.rF7vO5WqN3YvJZQXH8vL2Kw7xR9yH8mO');
+('Олена Бібліотекар', 'Librarian', '1985-04-12', 'librarian@mail.com', '$2a$10$gs12d4QKQ4vv8lWlKAIEAusoZ9M4.W9Nd051j0q4iSOTsOQM77.4a'),
+('Сергій Книжник', 'Librarian', '1988-09-05', 'librarian2@mail.com', '$2a$10$gs12d4QKQ4vv8lWlKAIEAusoZ9M4.W9Nd051j0q4iSOTsOQM77.4a');
 
--- Бухгалтер
 INSERT INTO public.users (fullname, role, dateofbirth, contactinfo, password_hash) VALUES
-('Наталія Фінансист', 'Accountant', '1990-06-18', 'accountant@mail.com', '$2a$10$XEZGxq3v3qN6KvZ1Y7xZJ.rF7vO5WqN3YvJZQXH8vL2Kw7xR9yH8mO');
+('Наталія Фінансист', 'Accountant', '1990-06-18', 'accountant@mail.com', '$2a$10$gs12d4QKQ4vv8lWlKAIEAusoZ9M4.W9Nd051j0q4iSOTsOQM77.4a');
 
--- Адміністратор
 INSERT INTO public.users (fullname, role, dateofbirth, contactinfo, password_hash) VALUES
-('Адмін Головний', 'Admin', '1980-01-01', 'admin@mail.com', '$2a$10$XEZGxq3v3qN6KvZ1Y7xZJ.rF7vO5WqN3YvJZQXH8vL2Kw7xR9yH8mO');
-
--- ============================================================================
--- СПІВРОБІТНИКИ
--- ============================================================================
+('Адмін Головний', 'Admin', '1980-01-01', 'admin@mail.com', '$2a$10$gs12d4QKQ4vv8lWlKAIEAusoZ9M4.W9Nd051j0q4iSOTsOQM77.4a');
 
 INSERT INTO public.employees (userid, "position", salaryrate, workedhours) VALUES
 (6, 'Бібліотекар', 150.00, 160),
 (7, 'Бібліотекар', 150.00, 140),
 (8, 'Бухгалтер', 200.00, 160),
 (9, 'Директор', 250.00, 160);
-
--- ============================================================================
--- КНИГИ
--- ============================================================================
 
 INSERT INTO public.books (title, publisher, language, year, location, status) VALUES
 ('Кобзар', 'Наукова думка', 'Українська', 1840, 'Зал А, полиця 1', 'Good'),
@@ -117,10 +83,6 @@ INSERT INTO public.books (title, publisher, language, year, location, status) VA
 ('The Shining', 'Doubleday', 'Англійська', 1977, 'Зал В, полиця 4', 'Good'),
 ('It', 'Viking', 'Англійська', 1986, 'Зал В, полиця 5', 'Damaged');
 
--- ============================================================================
--- ЗВ'ЯЗКИ КНИГИ-АВТОРИ
--- ============================================================================
-
 INSERT INTO public.book_authors (bookid, authorid) VALUES
 (1, 1),   -- Кобзар - Шевченко
 (2, 2),   -- Захар Беркут - Франко
@@ -137,10 +99,6 @@ INSERT INTO public.book_authors (bookid, authorid) VALUES
 (13, 15), -- Norwegian Wood - Murakami
 (14, 18), -- The Shining - King
 (15, 18); -- It - King
-
--- ============================================================================
--- ЗВ'ЯЗКИ КНИГИ-ЖАНРИ
--- ============================================================================
 
 INSERT INTO public.book_genres (bookid, genreid) VALUES
 (1, 6),   -- Кобзар - Поезія
@@ -162,10 +120,6 @@ INSERT INTO public.book_genres (bookid, genreid) VALUES
 (14, 1),  -- The Shining - Фантастика (жахи)
 (15, 1);  -- It - Фантастика (жахи)
 
--- ============================================================================
--- ПРАЙС-ЛИСТ
--- ============================================================================
-
 INSERT INTO public.price_list (booktitle, price) VALUES
 ('Кобзар', 150.00),
 ('1984', 200.00),
@@ -173,55 +127,53 @@ INSERT INTO public.price_list (booktitle, price) VALUES
 ('The Da Vinci Code', 180.00),
 ('Захар Беркут', 120.00);
 
--- ============================================================================
--- ТЕСТОВІ ПОЗИКИ (деякі прострочені для демонстрації)
--- ============================================================================
-
--- Активні позики
 INSERT INTO public.loans (userid, bookid, issuedate, duedate, returndate, isreturned, librarianid) VALUES
 (1, 1, CURRENT_DATE - INTERVAL '10 days', CURRENT_DATE + INTERVAL '4 days', NULL, false, 6),
 (2, 6, CURRENT_DATE - INTERVAL '5 days', CURRENT_DATE + INTERVAL '9 days', NULL, false, 6),
 (3, 8, CURRENT_DATE - INTERVAL '3 days', CURRENT_DATE + INTERVAL '11 days', NULL, false, 7);
 
--- Прострочені позики
 INSERT INTO public.loans (userid, bookid, issuedate, duedate, returndate, isreturned, librarianid) VALUES
 (4, 10, CURRENT_DATE - INTERVAL '25 days', CURRENT_DATE - INTERVAL '11 days', NULL, false, 6),
 (5, 12, CURRENT_DATE - INTERVAL '30 days', CURRENT_DATE - INTERVAL '16 days', NULL, false, 7);
 
--- Повернені позики
 INSERT INTO public.loans (userid, bookid, issuedate, duedate, returndate, isreturned, librarianid) VALUES
 (1, 7, CURRENT_DATE - INTERVAL '30 days', CURRENT_DATE - INTERVAL '16 days', CURRENT_DATE - INTERVAL '15 days', true, 6),
 (2, 9, CURRENT_DATE - INTERVAL '20 days', CURRENT_DATE - INTERVAL '6 days', CURRENT_DATE - INTERVAL '5 days', true, 7),
 (3, 11, CURRENT_DATE - INTERVAL '25 days', CURRENT_DATE - INTERVAL '11 days', CURRENT_DATE - INTERVAL '9 days', true, 6);
 
--- ============================================================================
--- ШТРАФИ (для прострочених та пошкоджених книг)
--- ============================================================================
+INSERT INTO public.fines (loanid, amount, ispaid, issuedate, paymentdate, payment_initiated_date, confirmed_by_accountant_id) VALUES
+(8, 10.00, true, CURRENT_DATE - INTERVAL '9 days', CURRENT_DATE - INTERVAL '5 days', CURRENT_DATE - INTERVAL '6 days', 8);
 
-INSERT INTO public.fines (loanid, amount, ispaid, issuedate, paymentdate) VALUES
-(4, 70.00, false, CURRENT_DATE - INTERVAL '11 days', NULL),    -- Прострочення на 14 днів * 5 грн
-(5, 80.00, false, CURRENT_DATE - INTERVAL '16 days', NULL),    -- Прострочення на 16 днів * 5 грн
-(8, 10.00, true, CURRENT_DATE - INTERVAL '9 days', CURRENT_DATE - INTERVAL '5 days'); -- Оплачений штраф
+INSERT INTO public.fines (loanid, amount, ispaid, issuedate, paymentdate, payment_initiated_date, confirmed_by_accountant_id) VALUES
+(4, 70.00, false, CURRENT_DATE - INTERVAL '11 days', NULL, CURRENT_DATE - INTERVAL '2 days', NULL);
 
--- ============================================================================
--- РЕЗЕРВАЦІЇ
--- ============================================================================
+INSERT INTO public.fines (loanid, amount, ispaid, issuedate, paymentdate, payment_initiated_date, confirmed_by_accountant_id) VALUES
+(5, 80.00, false, CURRENT_DATE - INTERVAL '16 days', NULL, NULL, NULL);
 
-INSERT INTO public.reservations (userid, bookid, reservationdate, pickupdate, iscompleted) VALUES
-(1, 14, CURRENT_DATE - INTERVAL '2 days', CURRENT_DATE + INTERVAL '3 days', false),
-(2, 15, CURRENT_DATE - INTERVAL '1 day', CURRENT_DATE + INTERVAL '4 days', false),
-(3, 13, CURRENT_DATE - INTERVAL '5 days', CURRENT_DATE - INTERVAL '1 day', true);
+INSERT INTO public.reservations (userid, bookid, reservationdate, pickupdate, iscompleted, isconfirmed, librarianid) VALUES
+(1, 14, CURRENT_DATE - INTERVAL '2 days', CURRENT_DATE + INTERVAL '3 days', false, true, 6);
 
--- ============================================================================
--- ЗАМОВЛЕННЯ КНИГ
--- ============================================================================
+INSERT INTO public.reservations (userid, bookid, reservationdate, pickupdate, iscompleted, isconfirmed, librarianid) VALUES
+(2, 15, CURRENT_DATE - INTERVAL '1 day', NULL, false, false, NULL);
 
-INSERT INTO public.orders (bookid, orderdate, quantity, totalprice, status) VALUES
-(1, CURRENT_DATE - INTERVAL '30 days', 5, 750.00, 'Completed'),
-(6, CURRENT_DATE - INTERVAL '15 days', 10, 2000.00, 'In Progress'),
-(8, CURRENT_DATE - INTERVAL '5 days', 3, 750.00, 'Pending');
+INSERT INTO public.reservations (userid, bookid, reservationdate, pickupdate, iscompleted, isconfirmed, librarianid) VALUES
+(3, 13, CURRENT_DATE - INTERVAL '5 days', CURRENT_DATE - INTERVAL '1 day', true, true, 7);
 
--- Повідомлення про успішне заповнення
+INSERT INTO public.orders (orderdate, supplier, totalprice, status) VALUES
+(CURRENT_DATE - INTERVAL '30 days', 'Видавництво "Наукова думка"', 1050.00, 'Completed'),
+(CURRENT_DATE - INTERVAL '15 days', 'BookChef Publishing', 1400.00, 'In Progress'),
+(CURRENT_DATE - INTERVAL '5 days', 'А-БА-БА-ГА-ЛА-МА-ГА', 0.00, 'Pending');
+
+INSERT INTO public.order_items (orderid, pricelistid, quantity) VALUES
+-- Замовлення 1 (завершене)
+(1, 1, 5),   -- 5 примірників Кобзар
+(1, 4, 2),   -- 2 примірники Код да Вінчі
+-- Замовлення 2 (в процесі)
+(2, 2, 10),  -- 10 примірників 1984
+(2, 3, 4),   -- 4 примірники Harry Potter
+-- Замовлення 3 (очікує)
+(3, 5, 3);   -- 3 примірники Захар Беркут
+
 DO $$
 BEGIN
     RAISE NOTICE 'База даних успішно заповнена тестовими даними!';

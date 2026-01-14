@@ -29,4 +29,32 @@ fineRouter.post(
   FineController.payFine
 );
 
+// Ініціювати оплату штрафу (для читачів)
+fineRouter.post(
+  '/:id/initiate-payment',
+  [checkJwt],
+  FineController.initiatePayment
+);
+
+// Підтвердити оплату штрафу (для бухгалтерів)
+fineRouter.post(
+  '/:id/confirm-payment',
+  [checkJwt, checkRole(['Accountant' as UserRole, UserRole.Admin])],
+  FineController.confirmPayment
+);
+
+// Отримати непідтверджені платежі (для бухгалтерів)
+fineRouter.get(
+  '/pending-payments',
+  [checkJwt, checkRole(['Accountant' as UserRole, UserRole.Admin])],
+  FineController.getPendingPayments
+);
+
+// Отримати статистику штрафів (для адмінів/бухгалтерів)
+fineRouter.get(
+  '/statistics',
+  [checkJwt, checkRole(['Accountant' as UserRole, UserRole.Admin])],
+  FineController.getStatistics
+);
+
 export default fineRouter;

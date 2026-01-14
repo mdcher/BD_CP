@@ -9,8 +9,8 @@ export const issue = async (req: Request, res: Response, next: NextFunction) => 
         if (!userId || !bookId) {
             throw new CustomError(400, 'Validation', 'UserId and BookId are required');
         }
-        await LoanService.issueBook(userId, bookId, librarianId, days);
-        res.status(201).json({ message: 'Книгу успішно видано' });
+        const result = await LoanService.issueBook(userId, bookId, librarianId, days);
+        res.customSuccess(201, 'Книгу успішно видано', result);
     } catch (err) {
         next(err);
     }
@@ -20,8 +20,8 @@ export const returnBook = async (req: Request, res: Response, next: NextFunction
     const { id } = req.params; // loanId
     const librarianId = req.jwtPayload.id;
     try {
-        await LoanService.returnBook(Number(id), librarianId);
-        res.status(200).json({ message: 'Книгу повернуто' });
+        const result = await LoanService.returnBook(Number(id), librarianId);
+        res.customSuccess(200, 'Книгу повернуто', result);
     } catch (err) {
         next(err);
     }
@@ -30,7 +30,18 @@ export const returnBook = async (req: Request, res: Response, next: NextFunction
 export const myHistory = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const history = await LoanService.getHistory();
-        res.status(200).json(history);
+        res.customSuccess(200, 'My loans history', history);
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const markAsLost = async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params; // loanId
+    const librarianId = req.jwtPayload.id;
+    try {
+        const result = await LoanService.markAsLost(Number(id), librarianId);
+        res.status(200).json(result);
     } catch (err) {
         next(err);
     }

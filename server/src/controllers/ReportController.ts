@@ -62,4 +62,44 @@ export const ReportController = {
       next(err);
     }
   },
+
+  // Прогнозування попиту
+  getDemandForecast: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const data = await ReportService.getDemandForecast();
+      res.customSuccess(200, 'Demand forecast.', data);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // Статистика активності користувачів
+  getUserActivityStats: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const data = await ReportService.getUserActivityStats();
+      res.customSuccess(200, 'User activity statistics.', data);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // Детальна інформація про замовлення
+  getOrdersDetailed: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const data = await ReportService.getOrdersDetailed();
+      res.customSuccess(200, 'Orders detailed.', data);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // Активні видачі книг
+  getActiveLoans: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const data = await ReportService.getActiveLoans();
+      res.customSuccess(200, 'Active loans.', data);
+    } catch (err) {
+      next(err);
+    }
+  },
 };

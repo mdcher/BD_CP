@@ -29,6 +29,7 @@ import { Route as AuthorsIndexRouteImport } from './routes/authors/index'
 import { Route as UsersUserIdRouteImport } from './routes/users.$userId'
 import { Route as ReportsTopReadersRouteImport } from './routes/reports/top-readers'
 import { Route as ReportsReadingStatsRouteImport } from './routes/reports/reading-stats'
+import { Route as ReportsMyReservationsRouteImport } from './routes/reports/my-reservations'
 import { Route as ReportsMyFinesRouteImport } from './routes/reports/my-fines'
 import { Route as ReportsGenresRouteImport } from './routes/reports/genres'
 import { Route as ReportsFinancialRouteImport } from './routes/reports/financial'
@@ -37,6 +38,8 @@ import { Route as ReportsAuthorsRouteImport } from './routes/reports/authors'
 import { Route as LoansCreateRouteImport } from './routes/loans/create'
 import { Route as LoansLoanIdRouteImport } from './routes/loans/$loanId'
 import { Route as LibrarianReservationsRouteImport } from './routes/librarian/reservations'
+import { Route as LibrarianRegisterUserRouteImport } from './routes/librarian/register-user'
+import { Route as LibrarianPendingReservationsRouteImport } from './routes/librarian/pending-reservations'
 import { Route as LibrarianIssueReturnRouteImport } from './routes/librarian/issue-return'
 import { Route as GenresCreateRouteImport } from './routes/genres/create'
 import { Route as GenresGenreIdRouteImport } from './routes/genres/$genreId'
@@ -47,6 +50,7 @@ import { Route as BooksBookIdRouteImport } from './routes/books.$bookId'
 import { Route as AuthorsCreateRouteImport } from './routes/authors/create'
 import { Route as AuthorsAuthorIdRouteImport } from './routes/authors/$authorId'
 import { Route as AdminUsersRouteImport } from './routes/admin/users'
+import { Route as AccountantPendingPaymentsRouteImport } from './routes/accountant/pending-payments'
 import { Route as AccountantFinancialsRouteImport } from './routes/accountant/financials'
 import { Route as AdminUsersCreateRouteImport } from './routes/admin/users/create'
 
@@ -150,6 +154,11 @@ const ReportsReadingStatsRoute = ReportsReadingStatsRouteImport.update({
   path: '/reading-stats',
   getParentRoute: () => ReportsRoute,
 } as any)
+const ReportsMyReservationsRoute = ReportsMyReservationsRouteImport.update({
+  id: '/my-reservations',
+  path: '/my-reservations',
+  getParentRoute: () => ReportsRoute,
+} as any)
 const ReportsMyFinesRoute = ReportsMyFinesRouteImport.update({
   id: '/my-fines',
   path: '/my-fines',
@@ -190,6 +199,17 @@ const LibrarianReservationsRoute = LibrarianReservationsRouteImport.update({
   path: '/librarian/reservations',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LibrarianRegisterUserRoute = LibrarianRegisterUserRouteImport.update({
+  id: '/librarian/register-user',
+  path: '/librarian/register-user',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LibrarianPendingReservationsRoute =
+  LibrarianPendingReservationsRouteImport.update({
+    id: '/librarian/pending-reservations',
+    path: '/librarian/pending-reservations',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LibrarianIssueReturnRoute = LibrarianIssueReturnRouteImport.update({
   id: '/librarian/issue-return',
   path: '/librarian/issue-return',
@@ -240,6 +260,12 @@ const AdminUsersRoute = AdminUsersRouteImport.update({
   path: '/admin/users',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AccountantPendingPaymentsRoute =
+  AccountantPendingPaymentsRouteImport.update({
+    id: '/accountant/pending-payments',
+    path: '/accountant/pending-payments',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AccountantFinancialsRoute = AccountantFinancialsRouteImport.update({
   id: '/accountant/financials',
   path: '/accountant/financials',
@@ -264,6 +290,7 @@ export interface FileRoutesByFullPath {
   '/reports': typeof ReportsRouteWithChildren
   '/users': typeof UsersRouteWithChildren
   '/accountant/financials': typeof AccountantFinancialsRoute
+  '/accountant/pending-payments': typeof AccountantPendingPaymentsRoute
   '/admin/users': typeof AdminUsersRouteWithChildren
   '/authors/$authorId': typeof AuthorsAuthorIdRoute
   '/authors/create': typeof AuthorsCreateRoute
@@ -274,6 +301,8 @@ export interface FileRoutesByFullPath {
   '/genres/$genreId': typeof GenresGenreIdRoute
   '/genres/create': typeof GenresCreateRoute
   '/librarian/issue-return': typeof LibrarianIssueReturnRoute
+  '/librarian/pending-reservations': typeof LibrarianPendingReservationsRoute
+  '/librarian/register-user': typeof LibrarianRegisterUserRoute
   '/librarian/reservations': typeof LibrarianReservationsRoute
   '/loans/$loanId': typeof LoansLoanIdRoute
   '/loans/create': typeof LoansCreateRoute
@@ -282,6 +311,7 @@ export interface FileRoutesByFullPath {
   '/reports/financial': typeof ReportsFinancialRoute
   '/reports/genres': typeof ReportsGenresRoute
   '/reports/my-fines': typeof ReportsMyFinesRoute
+  '/reports/my-reservations': typeof ReportsMyReservationsRoute
   '/reports/reading-stats': typeof ReportsReadingStatsRoute
   '/reports/top-readers': typeof ReportsTopReadersRoute
   '/users/$userId': typeof UsersUserIdRoute
@@ -301,6 +331,7 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/users': typeof UsersRouteWithChildren
   '/accountant/financials': typeof AccountantFinancialsRoute
+  '/accountant/pending-payments': typeof AccountantPendingPaymentsRoute
   '/admin/users': typeof AdminUsersRouteWithChildren
   '/authors/$authorId': typeof AuthorsAuthorIdRoute
   '/authors/create': typeof AuthorsCreateRoute
@@ -311,6 +342,8 @@ export interface FileRoutesByTo {
   '/genres/$genreId': typeof GenresGenreIdRoute
   '/genres/create': typeof GenresCreateRoute
   '/librarian/issue-return': typeof LibrarianIssueReturnRoute
+  '/librarian/pending-reservations': typeof LibrarianPendingReservationsRoute
+  '/librarian/register-user': typeof LibrarianRegisterUserRoute
   '/librarian/reservations': typeof LibrarianReservationsRoute
   '/loans/$loanId': typeof LoansLoanIdRoute
   '/loans/create': typeof LoansCreateRoute
@@ -319,6 +352,7 @@ export interface FileRoutesByTo {
   '/reports/financial': typeof ReportsFinancialRoute
   '/reports/genres': typeof ReportsGenresRoute
   '/reports/my-fines': typeof ReportsMyFinesRoute
+  '/reports/my-reservations': typeof ReportsMyReservationsRoute
   '/reports/reading-stats': typeof ReportsReadingStatsRoute
   '/reports/top-readers': typeof ReportsTopReadersRoute
   '/users/$userId': typeof UsersUserIdRoute
@@ -344,6 +378,7 @@ export interface FileRoutesById {
   '/reports': typeof ReportsRouteWithChildren
   '/users': typeof UsersRouteWithChildren
   '/accountant/financials': typeof AccountantFinancialsRoute
+  '/accountant/pending-payments': typeof AccountantPendingPaymentsRoute
   '/admin/users': typeof AdminUsersRouteWithChildren
   '/authors/$authorId': typeof AuthorsAuthorIdRoute
   '/authors/create': typeof AuthorsCreateRoute
@@ -354,6 +389,8 @@ export interface FileRoutesById {
   '/genres/$genreId': typeof GenresGenreIdRoute
   '/genres/create': typeof GenresCreateRoute
   '/librarian/issue-return': typeof LibrarianIssueReturnRoute
+  '/librarian/pending-reservations': typeof LibrarianPendingReservationsRoute
+  '/librarian/register-user': typeof LibrarianRegisterUserRoute
   '/librarian/reservations': typeof LibrarianReservationsRoute
   '/loans/$loanId': typeof LoansLoanIdRoute
   '/loans/create': typeof LoansCreateRoute
@@ -362,6 +399,7 @@ export interface FileRoutesById {
   '/reports/financial': typeof ReportsFinancialRoute
   '/reports/genres': typeof ReportsGenresRoute
   '/reports/my-fines': typeof ReportsMyFinesRoute
+  '/reports/my-reservations': typeof ReportsMyReservationsRoute
   '/reports/reading-stats': typeof ReportsReadingStatsRoute
   '/reports/top-readers': typeof ReportsTopReadersRoute
   '/users/$userId': typeof UsersUserIdRoute
@@ -388,6 +426,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/users'
     | '/accountant/financials'
+    | '/accountant/pending-payments'
     | '/admin/users'
     | '/authors/$authorId'
     | '/authors/create'
@@ -398,6 +437,8 @@ export interface FileRouteTypes {
     | '/genres/$genreId'
     | '/genres/create'
     | '/librarian/issue-return'
+    | '/librarian/pending-reservations'
+    | '/librarian/register-user'
     | '/librarian/reservations'
     | '/loans/$loanId'
     | '/loans/create'
@@ -406,6 +447,7 @@ export interface FileRouteTypes {
     | '/reports/financial'
     | '/reports/genres'
     | '/reports/my-fines'
+    | '/reports/my-reservations'
     | '/reports/reading-stats'
     | '/reports/top-readers'
     | '/users/$userId'
@@ -425,6 +467,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/users'
     | '/accountant/financials'
+    | '/accountant/pending-payments'
     | '/admin/users'
     | '/authors/$authorId'
     | '/authors/create'
@@ -435,6 +478,8 @@ export interface FileRouteTypes {
     | '/genres/$genreId'
     | '/genres/create'
     | '/librarian/issue-return'
+    | '/librarian/pending-reservations'
+    | '/librarian/register-user'
     | '/librarian/reservations'
     | '/loans/$loanId'
     | '/loans/create'
@@ -443,6 +488,7 @@ export interface FileRouteTypes {
     | '/reports/financial'
     | '/reports/genres'
     | '/reports/my-fines'
+    | '/reports/my-reservations'
     | '/reports/reading-stats'
     | '/reports/top-readers'
     | '/users/$userId'
@@ -467,6 +513,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/users'
     | '/accountant/financials'
+    | '/accountant/pending-payments'
     | '/admin/users'
     | '/authors/$authorId'
     | '/authors/create'
@@ -477,6 +524,8 @@ export interface FileRouteTypes {
     | '/genres/$genreId'
     | '/genres/create'
     | '/librarian/issue-return'
+    | '/librarian/pending-reservations'
+    | '/librarian/register-user'
     | '/librarian/reservations'
     | '/loans/$loanId'
     | '/loans/create'
@@ -485,6 +534,7 @@ export interface FileRouteTypes {
     | '/reports/financial'
     | '/reports/genres'
     | '/reports/my-fines'
+    | '/reports/my-reservations'
     | '/reports/reading-stats'
     | '/reports/top-readers'
     | '/users/$userId'
@@ -510,8 +560,11 @@ export interface RootRouteChildren {
   ReportsRoute: typeof ReportsRouteWithChildren
   UsersRoute: typeof UsersRouteWithChildren
   AccountantFinancialsRoute: typeof AccountantFinancialsRoute
+  AccountantPendingPaymentsRoute: typeof AccountantPendingPaymentsRoute
   AdminUsersRoute: typeof AdminUsersRouteWithChildren
   LibrarianIssueReturnRoute: typeof LibrarianIssueReturnRoute
+  LibrarianPendingReservationsRoute: typeof LibrarianPendingReservationsRoute
+  LibrarianRegisterUserRoute: typeof LibrarianRegisterUserRoute
   LibrarianReservationsRoute: typeof LibrarianReservationsRoute
   LoansLoanIdRoute: typeof LoansLoanIdRoute
   LoansCreateRoute: typeof LoansCreateRoute
@@ -660,6 +713,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportsReadingStatsRouteImport
       parentRoute: typeof ReportsRoute
     }
+    '/reports/my-reservations': {
+      id: '/reports/my-reservations'
+      path: '/my-reservations'
+      fullPath: '/reports/my-reservations'
+      preLoaderRoute: typeof ReportsMyReservationsRouteImport
+      parentRoute: typeof ReportsRoute
+    }
     '/reports/my-fines': {
       id: '/reports/my-fines'
       path: '/my-fines'
@@ -714,6 +774,20 @@ declare module '@tanstack/react-router' {
       path: '/librarian/reservations'
       fullPath: '/librarian/reservations'
       preLoaderRoute: typeof LibrarianReservationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/librarian/register-user': {
+      id: '/librarian/register-user'
+      path: '/librarian/register-user'
+      fullPath: '/librarian/register-user'
+      preLoaderRoute: typeof LibrarianRegisterUserRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/librarian/pending-reservations': {
+      id: '/librarian/pending-reservations'
+      path: '/librarian/pending-reservations'
+      fullPath: '/librarian/pending-reservations'
+      preLoaderRoute: typeof LibrarianPendingReservationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/librarian/issue-return': {
@@ -784,6 +858,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/users'
       fullPath: '/admin/users'
       preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/accountant/pending-payments': {
+      id: '/accountant/pending-payments'
+      path: '/accountant/pending-payments'
+      fullPath: '/accountant/pending-payments'
+      preLoaderRoute: typeof AccountantPendingPaymentsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/accountant/financials': {
@@ -869,6 +950,7 @@ interface ReportsRouteChildren {
   ReportsFinancialRoute: typeof ReportsFinancialRoute
   ReportsGenresRoute: typeof ReportsGenresRoute
   ReportsMyFinesRoute: typeof ReportsMyFinesRoute
+  ReportsMyReservationsRoute: typeof ReportsMyReservationsRoute
   ReportsReadingStatsRoute: typeof ReportsReadingStatsRoute
   ReportsTopReadersRoute: typeof ReportsTopReadersRoute
   ReportsIndexRoute: typeof ReportsIndexRoute
@@ -880,6 +962,7 @@ const ReportsRouteChildren: ReportsRouteChildren = {
   ReportsFinancialRoute: ReportsFinancialRoute,
   ReportsGenresRoute: ReportsGenresRoute,
   ReportsMyFinesRoute: ReportsMyFinesRoute,
+  ReportsMyReservationsRoute: ReportsMyReservationsRoute,
   ReportsReadingStatsRoute: ReportsReadingStatsRoute,
   ReportsTopReadersRoute: ReportsTopReadersRoute,
   ReportsIndexRoute: ReportsIndexRoute,
@@ -923,8 +1006,11 @@ const rootRouteChildren: RootRouteChildren = {
   ReportsRoute: ReportsRouteWithChildren,
   UsersRoute: UsersRouteWithChildren,
   AccountantFinancialsRoute: AccountantFinancialsRoute,
+  AccountantPendingPaymentsRoute: AccountantPendingPaymentsRoute,
   AdminUsersRoute: AdminUsersRouteWithChildren,
   LibrarianIssueReturnRoute: LibrarianIssueReturnRoute,
+  LibrarianPendingReservationsRoute: LibrarianPendingReservationsRoute,
+  LibrarianRegisterUserRoute: LibrarianRegisterUserRoute,
   LibrarianReservationsRoute: LibrarianReservationsRoute,
   LoansLoanIdRoute: LoansLoanIdRoute,
   LoansCreateRoute: LoansCreateRoute,

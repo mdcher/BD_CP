@@ -1,14 +1,14 @@
 import type * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useMyUnpaidFines, usePayFine } from "@/features/fines/finesApi";
+import { useMyUnpaidFines, useInitiatePayment } from "@/features/fines/finesApi";
 
 function MyFinesPage(): React.JSX.Element {
 	const { data: fines, isLoading, error } = useMyUnpaidFines();
-	const payFineMutation = usePayFine();
+	const initiatePaymentMutation = useInitiatePayment();
 
-	const handlePayFine = (fineId: number): void => {
-		if (confirm("Ви впевнені, що хочете оплатити цей штраф?")) {
-			payFineMutation.mutate(fineId);
+	const handleInitiatePayment = (fineId: number): void => {
+		if (confirm("Ви впевнені, що хочете ініціювати оплату цього штрафу? Оплата потребує підтвердження бухгалтера.")) {
+			initiatePaymentMutation.mutate(fineId);
 		}
 	};
 
@@ -106,11 +106,11 @@ function MyFinesPage(): React.JSX.Element {
 										</div>
 										<button
 											type="button"
-											onClick={() => handlePayFine(fine.fineid)}
-											disabled={payFineMutation.isPending}
+											onClick={() => handleInitiatePayment(fine.fineid)}
+											disabled={initiatePaymentMutation.isPending}
 											className="rounded-lg bg-gradient-to-r from-green-500 to-green-600 px-6 py-2.5 text-sm font-medium text-white shadow-md shadow-green-500/20 transition-all hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
 										>
-											{payFineMutation.isPending ? "Оплата..." : "Оплатити"}
+											{initiatePaymentMutation.isPending ? "Обробка..." : "Ініціювати оплату"}
 										</button>
 									</div>
 								</div>
@@ -127,8 +127,8 @@ function MyFinesPage(): React.JSX.Element {
 							</h3>
 						</div>
 						<p className="text-sm text-blue-700">
-							Після натискання кнопки "Оплатити" штраф буде позначено як оплачений.
-							Зверніть увагу: це демо-версія, реальна оплата не здійснюється.
+							Після натискання кнопки "Ініціювати оплату" ваша заявка буде відправлена бухгалтеру для підтвердження.
+							Штраф буде позначено як оплачений після підтвердження бухгалтером.
 						</p>
 					</div>
 				</>

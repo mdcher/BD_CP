@@ -17,6 +17,7 @@ interface IBookService {
   getOne: (id: number) => Promise<any>;
   create: (data: BookData) => Promise<any>;
   update: (bookId: number, data: BookData) => Promise<any>;
+  delete: (bookId: number) => Promise<any>;
 }
 
 export const BookService: IBookService = {
@@ -65,6 +66,16 @@ export const BookService: IBookService = {
       return { bookId, ...data };
     } catch (err) {
       throw new CustomError(500, 'Raw', `Failed to update book with id ${bookId}`, null, err);
+    }
+  },
+
+  delete: async (bookId: number): Promise<any> => {
+    const connection = getConnection();
+    try {
+      await connection.query('CALL public.delete_book($1::integer)', [bookId]);
+      return { message: 'Book deleted successfully.', bookId };
+    } catch (err: any) {
+      throw new CustomError(400, 'Raw', 'Delete book failed', [err.message]);
     }
   },
 };

@@ -56,4 +56,27 @@ export const ReservationController = {
       next(err);
     }
   },
+
+  // Підтвердити бронювання (для бібліотекарів)
+  confirm: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const reservationId = Number(req.params.id);
+      const librarianId = req.jwtPayload.id;
+      const { pickupDate } = req.body;
+      const confirmedReservation = await ReservationService.confirm(reservationId, librarianId, pickupDate);
+      res.customSuccess(200, 'Reservation confirmed.', confirmedReservation);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // Отримати непідтверджені бронювання (для бібліотекарів)
+  getPending: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const reservations = await ReservationService.getPending();
+      res.customSuccess(200, 'Pending reservations.', reservations);
+    } catch (err) {
+      next(err);
+    }
+  },
 };

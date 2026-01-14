@@ -13,22 +13,20 @@ export const UserService = {
     }
   },
 
-  setLockStatus: async (userId: number, isBlocked: boolean) => {
+  setLockStatus: async (userId: number, isBlocked: boolean, adminId?: number) => {
     const connection = getConnection();
     try {
-      const query = `
-        UPDATE public.users
-        SET isblocked = $1::boolean
-        WHERE userid = $2::integer
-        RETURNING userid, fullname, isblocked;
-      `;
-      const result = await connection.query(query, [isBlocked, userId]);
-      if (result[1] === 0) {
-        throw new CustomError(404, 'General', `User with ID ${userId} not found.`);
+      // Використовуємо процедури БД для блокування/розблокування користувачів
+      if (isBlocked) {
+        await connection.query('CALL public.block_user($1::integer, $2::integer)', [userId, adminId || 1]);
+      } else {
+        await connection.query('CALL public.unblock_user($1::integer, $2::integer)', [userId, adminId || 1]);
       }
-      return result[0][0];
-    } catch (err) {
-      throw new CustomError(500, 'Raw', 'Failed to update user lock status', null, err);
+      // Повертаємо оновлені дані
+      const result = await connection.query('SELECT userid, fullname, isblocked FROM public.users WHERE userid = $1', [userId]);
+      return result[0];
+    } catch (err: any) {
+      throw new CustomError(400, 'Raw', 'Failed to update user lock status', [err.message]);
     }
   },
 
@@ -62,5 +60,29 @@ export const UserService = {
 
   toggleBlock: async (userId: number, isBlocked: boolean) => {
     return UserService.setLockStatus(userId, isBlocked);
+  },
+
+  // Оновити вартість типу порушення (для адмінів)
+  updateViolationCost: async (typeId: number, newCost: number, adminId: number) => {
+    const connection = getConnection();
+    try {
+      await connection.query(
+        'CALL public.update_violation_type_cost($1::integer, $2::numeric, $3::integer)',
+        [typeId, newCost, adminId]
+      );
+      return { message: 'Violation cost updated successfully.', typeId, newCost };
+    } catch (err: any) {
+      throw new CustomError(400, 'Raw', 'Update violation cost failed', [err.message]);
+    }
+  },
+
+  // Отримати всі типи порушень
+  getViolationTypes: async () => {
+    const connection = getConnection();
+    try {
+      return await connection.query('SELECT * FROM public.violation_types ORDER BY typeid;');
+    } catch (err: any) {
+      throw new CustomError(500, 'Raw', 'Failed to fetch violation types', [err.message]);
+    }
   },
 };

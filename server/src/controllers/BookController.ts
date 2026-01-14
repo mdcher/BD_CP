@@ -48,4 +48,15 @@ export const BookController = {
       next(err);
     }
   },
+
+  // Видалити книгу (для бібліотекарів)
+  delete: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const bookId = Number(req.params.id);
+      const result = await BookService.delete(bookId);
+      res.customSuccess(200, result.message, result);
+    } catch (err) {
+      next(err);
+    }
+  },
 };

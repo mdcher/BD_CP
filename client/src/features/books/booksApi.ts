@@ -11,17 +11,17 @@ import apiClient from "@/lib/axios";
 import type { Book, CreateBookDto, UpdateBookDto } from "./types";
 
 const getBooks = async (): Promise<Array<Book>> => {
-	const response = await apiClient.get<{ message: string; data: Array<Book> }>("/books");
+	const response = await apiClient.get<Array<Book>>("/books");
 	return response.data;
 };
 
 const getBookById = async (id: string): Promise<Book> => {
-	const response = await apiClient.get<{ message: string; data: Book }>(`/books/${id}`);
+	const response = await apiClient.get<Book>(`/books/${id}`);
 	return response.data;
 };
 
 const createBook = async (data: CreateBookDto): Promise<Book> => {
-	const response = await apiClient.post<{ message: string; data: Book }>("/books", data);
+	const response = await apiClient.post<Book>("/books", data);
 	return response.data;
 };
 
@@ -32,7 +32,7 @@ const updateBook = async ({
 	id: string;
 	data: UpdateBookDto;
 }): Promise<Book> => {
-	const response = await apiClient.put<{ message: string; data: Book }>(`/books/${id}`, data);
+	const response = await apiClient.put<Book>(`/books/${id}`, data);
 	return response.data;
 };
 

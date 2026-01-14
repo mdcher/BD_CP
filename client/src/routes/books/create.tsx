@@ -1,7 +1,7 @@
 import type * as React from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-// import { useForm } from "react-hook-form";
-// import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useCreateBook } from "@/features/books/booksApi";
 import {
@@ -37,8 +37,8 @@ function CreateBookPage(): React.JSX.Element {
 		register,
 		handleSubmit,
 		formState: { errors },
-	} = useForm({
-		// resolver: zodResolver(createBookSchema),
+	} = useForm<CreateBookForm>({
+		resolver: zodResolver(createBookSchema),
 	});
 
 	const onSubmit = (data: CreateBookForm): void => {

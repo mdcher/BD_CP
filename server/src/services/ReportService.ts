@@ -62,4 +62,46 @@ export const ReportService = {
     `;
     return await connection.query(query, [limit]);
   },
+
+  // Прогнозування попиту (для адмінів та бібліотекарів)
+  getDemandForecast: async () => {
+    const connection = getConnection();
+    return await connection.query(`SELECT * FROM public.view_demand_forecast;`);
+  },
+
+  // Статистика активності користувачів (для адмінів та бібліотекарів)
+  getUserActivityStats: async () => {
+    const connection = getConnection();
+    return await connection.query(`SELECT * FROM public.view_user_activity_stats;`);
+  },
+
+  // Детальна інформація про замовлення (для адмінів та бухгалтерів)
+  getOrdersDetailed: async () => {
+    const connection = getConnection();
+    return await connection.query(`SELECT * FROM public.view_orders_detailed;`);
+  },
+
+  // Активні видачі книг (для бібліотекарів та адмінів)
+  getActiveLoans: async () => {
+    const connection = getConnection();
+    const query = `
+      SELECT
+        l.loanid,
+        u.fullname as username,
+        b.title as booktitle,
+        l.issuedate,
+        l.duedate,
+        CASE WHEN l.duedate < CURRENT_DATE THEN TRUE ELSE FALSE END as is_overdue,
+        CASE
+          WHEN l.duedate < CURRENT_DATE THEN CURRENT_DATE - l.duedate
+          ELSE NULL
+        END as days_overdue
+      FROM public.loans l
+      JOIN public.users u ON l.userid = u.userid
+      JOIN public.books b ON l.bookid = b.bookid
+      WHERE l.isreturned = FALSE
+      ORDER BY l.duedate ASC;
+    `;
+    return await connection.query(query);
+  },
 };

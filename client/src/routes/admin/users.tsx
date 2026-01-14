@@ -18,7 +18,7 @@ function AdminUsersPanel() {
 
     const fetchUsers = async () => {
         try {
-            const response = await axiosInstance.get('/api/v1/users', {
+            const response = await axiosInstance.get('/users', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setUsers(response.data);
@@ -34,7 +34,7 @@ function AdminUsersPanel() {
     const handleToggleBlock = async (userId: number, isBlocked: boolean) => {
         if (confirm(`Are you sure you want to ${isBlocked ? 'unblock' : 'block'} this user?`)) {
             try {
-                await apiClient.patch(
+                await axiosInstance.patch(
                     `/users/${userId}/block`,
                     { isBlocked: !isBlocked },
                     { headers: { Authorization: `Bearer ${token}` } },

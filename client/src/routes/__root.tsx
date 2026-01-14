@@ -36,6 +36,18 @@ function RootComponent(): React.JSX.Element {
 
 						{/* Навігація */}
 						<nav className="flex items-center gap-1 sm:gap-2">
+							{/* Головна - доступна всім */}
+							<Link
+								to="/"
+								activeProps={{
+									className:
+										"bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200",
+								}}
+								className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900"
+							>
+								Головна
+							</Link>
+
 							{/* Публічний доступ - каталог доступний всім (включно з гостями) */}
 							<Link
 								to="/books"
@@ -50,17 +62,30 @@ function RootComponent(): React.JSX.Element {
 
 							{isAuthenticated && (
 								<>
-									{/* Librarian/Admin Links */}
+									{/* Librarian Links */}
 									{(user?.role === 'Librarian' || user?.role === 'Admin') && (
 										<>
+											<Link to="/librarian/issue-return" activeProps={{ className: "bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200" }} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">Видача/Повернення</Link>
+											<Link to="/librarian/pending-reservations" activeProps={{ className: "bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200" }} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">Бронювання</Link>
+											<Link to="/librarian/register-user" activeProps={{ className: "bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200" }} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">Реєстрація</Link>
 											<Link to="/authors" activeProps={{ className: "bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200" }} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">Автори</Link>
 											<Link to="/genres" activeProps={{ className: "bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200" }} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">Жанри</Link>
 										</>
 									)}
 
-									{/* Admin/Accountant Links */}
-									{(user?.role === 'Admin' || user?.role === 'Accountant') && (
-										<Link to="/employees" activeProps={{ className: "bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200" }} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">Співробітники</Link>
+									{/* Accountant Links */}
+									{(user?.role === 'Accountant' || user?.role === 'Admin') && (
+										<>
+											<Link to="/accountant/pending-payments" activeProps={{ className: "bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200" }} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">Оплати штрафів</Link>
+										</>
+									)}
+
+									{/* Admin Links */}
+									{user?.role === 'Admin' && (
+										<>
+											<Link to="/employees" activeProps={{ className: "bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200" }} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">Співробітники</Link>
+											<Link to="/admin/users" activeProps={{ className: "bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200" }} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">Користувачі</Link>
+										</>
 									)}
 
 									{/* All Authenticated Users */}
@@ -74,7 +99,7 @@ function RootComponent(): React.JSX.Element {
 							{isAuthenticated ? (
                                 <>
                                     <Link
-                                        to="/profile" // Placeholder for user profile page
+                                        to="/profile"
                                         className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900"
                                     >
                                         Мій профіль ({user?.fullName})

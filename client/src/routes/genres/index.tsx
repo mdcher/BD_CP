@@ -102,23 +102,14 @@ function GenresPage(): React.JSX.Element {
 										{genre.genrename}
 									</td>
 									<td className="whitespace-nowrap px-6 py-4 text-right text-sm">
-										<div className="flex justify-end gap-2">
-											<Link
-												className="rounded-lg border border-indigo-100 bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-600 transition-colors hover:bg-indigo-100 hover:text-indigo-700"
-												to="/genres/$genreId"
-												params={{ genreId: String(genre.id) }}
-											>
-												Редагувати
-											</Link>
-											<button
-												className="rounded-lg border border-red-100 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100 hover:text-red-700"
-												onClick={() => {
-													handleDelete(genre.id);
-												}}
-											>
-												Видалити
-											</button>
-										</div>
+										<button
+											className="rounded-lg border border-red-100 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100 hover:text-red-700"
+											onClick={() => {
+												handleDelete(genre.id);
+											}}
+										>
+											Видалити
+										</button>
 									</td>
 								</tr>
 							))

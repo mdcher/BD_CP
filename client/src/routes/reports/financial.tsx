@@ -132,7 +132,7 @@ function FinancialReportPage(): React.JSX.Element {
 							}`}
 						>
 							{summary && summary.netbalance >= 0 ? "+" : ""}
-							{summary?.netbalance.toFixed(2)} грн
+							{(summary?.netbalance ?? 0).toFixed(2)} грн
 						</span>
 					</div>
 				</div>

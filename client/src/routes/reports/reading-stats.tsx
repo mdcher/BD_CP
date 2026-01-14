@@ -67,11 +67,11 @@ function ReadingStatsPage(): React.JSX.Element {
 									</td>
 									<td className="whitespace-nowrap px-6 py-4 text-right text-sm">
 										<span className="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800">
-											{stat.total_loans} видач
+											{stat.total_books_read} видач
 										</span>
 									</td>
 									<td className="whitespace-nowrap px-6 py-4 text-right text-sm text-slate-600">
-										{stat.avg_reading_duration.toFixed(1)} днів
+										{(stat.avg_reading_duration_days ?? 0).toFixed(1)} днів
 									</td>
 								</tr>
 							))

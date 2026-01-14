@@ -91,7 +91,7 @@ function TopReadersPage(): React.JSX.Element {
 										</span>
 									</td>
 									<td className="whitespace-nowrap px-6 py-4 text-right text-sm text-slate-600">
-										{reader.avg_days_per_book.toFixed(1)} днів
+										{(reader.avg_reading_duration_days ?? 0).toFixed(1)} днів
 									</td>
 								</tr>
 							))

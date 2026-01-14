@@ -103,7 +103,7 @@ export const EmployeeService = {
     `;
 
     const result = await connection.query(query, values);
-    if (result[0].length === 0) {
+    if (result.length === 0) {
       throw new CustomError(404, 'General', `Employee with ID ${employeeId} not found.`);
     }
     return result[0];

@@ -30,4 +30,11 @@ bookRouter.put(
   BookController.update
 );
 
+// Ендпоінт для видалення книги (тільки для бібліотекарів)
+bookRouter.delete(
+  '/:id',
+  [checkJwt, checkRole([UserRole.Librarian, UserRole.Admin])],
+  BookController.delete
+);
+
 export default bookRouter;

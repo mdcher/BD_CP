@@ -52,4 +52,32 @@ reportRouter.get(
   ReportController.getTopReaders
 );
 
+// Прогнозування попиту (для адмінів та бібліотекарів)
+reportRouter.get(
+  '/demand-forecast',
+  [checkJwt, checkRole([UserRole.Admin, UserRole.Librarian])],
+  ReportController.getDemandForecast
+);
+
+// Статистика активності користувачів (для адмінів та бібліотекарів)
+reportRouter.get(
+  '/user-activity-stats',
+  [checkJwt, checkRole([UserRole.Admin, UserRole.Librarian])],
+  ReportController.getUserActivityStats
+);
+
+// Детальна інформація про замовлення (для адмінів та бухгалтерів)
+reportRouter.get(
+  '/orders-detailed',
+  [checkJwt, checkRole([UserRole.Admin, 'Accountant' as UserRole])],
+  ReportController.getOrdersDetailed
+);
+
+// Активні видачі книг (для бібліотекарів та адмінів)
+reportRouter.get(
+  '/active-loans',
+  [checkJwt, checkRole([UserRole.Admin, UserRole.Librarian])],
+  ReportController.getActiveLoans
+);
+
 export default reportRouter;

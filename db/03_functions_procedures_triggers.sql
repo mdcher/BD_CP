@@ -1,17 +1,5 @@
--- ============================================================================
--- ФАЙЛ 3: ФУНКЦІЇ, ПРОЦЕДУРИ ТА ТРИГЕРИ
--- Опис: Бізнес-логіка системи (функції, процедури, тригери)
--- ============================================================================
-
 SET client_encoding = 'UTF8';
 
--- ============================================================================
--- ФУНКЦІЇ ДЛЯ ТРИГЕРІВ
--- ============================================================================
-
--- Функція: Автоблокування та лічильник порушень
--- Оновлює кількість порушень при створенні/видаленні штрафів
--- Блокує користувача при накопиченні 3+ порушень
 CREATE OR REPLACE FUNCTION public.update_violation_count() RETURNS trigger
     LANGUAGE plpgsql
 AS $$
@@ -43,8 +31,6 @@ BEGIN
 END;
 $$;
 
--- Функція: Нарахування штрафу при поверненні
--- Автоматично створює штраф за прострочення при поверненні книги
 CREATE OR REPLACE FUNCTION public.calculate_fine_on_return() RETURNS trigger
     LANGUAGE plpgsql
 AS $$
@@ -76,8 +62,6 @@ BEGIN
 END;
 $$;
 
--- Функція: Перевірка доступності книг (для Loans та Reservations)
--- Перевіряє чи є вільні примірники книги перед видачею/резервацією
 CREATE OR REPLACE FUNCTION public.func_checkavailabilitycombined() RETURNS trigger
     LANGUAGE plpgsql
 AS $$
@@ -127,8 +111,6 @@ BEGIN
 END;
 $$;
 
--- Функція: Заборона видачі заблокованим користувачам
--- Перевіряє чи користувач не заблокований і не має неоплачених штрафів
 CREATE OR REPLACE FUNCTION public.func_prevent_loan_submission() RETURNS trigger
     LANGUAGE plpgsql
 AS $$
@@ -156,8 +138,6 @@ BEGIN
 END;
 $$;
 
--- Функція: Перерахунок вартості замовлення
--- Автоматично оновлює загальну вартість при зміні позицій замовлення
 CREATE OR REPLACE FUNCTION public.update_order_total_cost() RETURNS trigger
     LANGUAGE plpgsql
 AS $$
@@ -183,12 +163,6 @@ BEGIN
 END;
 $$;
 
--- ============================================================================
--- ПРОЦЕДУРИ (STORED PROCEDURES)
--- ============================================================================
-
--- Процедура: Видача книги
--- Створює новий запис про видачу книги користувачу
 CREATE OR REPLACE PROCEDURE public.issue_book(
     IN p_user_id integer,
     IN p_book_id integer,
@@ -205,8 +179,6 @@ BEGIN
 END;
 $$;
 
--- Процедура: Повернення книги
--- Відмічає книгу як повернуту
 CREATE OR REPLACE PROCEDURE public.return_book(IN p_loan_id integer)
 LANGUAGE plpgsql
 AS $$
@@ -224,8 +196,6 @@ BEGIN
 END;
 $$;
 
--- Процедура: Створення користувача
--- Додає нового користувача до системи
 CREATE OR REPLACE PROCEDURE public.create_user(
     IN p_fullname character varying,
     IN p_contactinfo character varying,
@@ -243,8 +213,6 @@ BEGIN
 END;
 $$;
 
--- Функція: Логін користувача
--- Повертає дані користувача для автентифікації
 CREATE OR REPLACE FUNCTION public.login(p_contactinfo character varying)
     RETURNS TABLE(
         userid integer,
@@ -263,8 +231,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Процедура: Створення книги
--- Додає нову книгу та її зв'язки з авторами і жанрами
 CREATE OR REPLACE PROCEDURE public.create_book(
     IN p_title character varying,
     IN p_publisher character varying,
@@ -309,8 +275,6 @@ BEGIN
 END;
 $$;
 
--- Процедура: Оновлення книги
--- Оновлює дані книги та її зв'язки
 CREATE OR REPLACE PROCEDURE public.update_book(
     IN p_book_id integer,
     IN p_title character varying,
@@ -362,8 +326,6 @@ BEGIN
 END;
 $$;
 
--- Процедура: Оплата штрафу
--- Відмічає штраф як оплачений з перевіркою прав доступу
 CREATE OR REPLACE PROCEDURE public.pay_fine(
     p_fine_id integer,
     p_paid_by_user_id integer
@@ -419,11 +381,343 @@ BEGIN
 END;
 $$;
 
--- ============================================================================
--- АГРЕГАТНІ ФУНКЦІЇ
--- ============================================================================
+CREATE OR REPLACE PROCEDURE public.confirm_reservation(
+    p_reservation_id integer,
+    p_librarian_id integer,
+    p_pickup_date date DEFAULT NULL
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_reservation_user_id integer;
+    v_reservation_book_id integer;
+BEGIN
+    -- Отримуємо дані бронювання
+    SELECT userid, bookid INTO v_reservation_user_id, v_reservation_book_id
+    FROM public.reservations
+    WHERE reservationid = p_reservation_id AND isconfirmed = false AND iscompleted = false;
 
--- Функція акумуляції для розрахунку середньої тривалості читання
+    -- Перевіряємо, чи існує бронювання
+    IF v_reservation_user_id IS NULL THEN
+        RAISE EXCEPTION 'Reservation % not found or already confirmed', p_reservation_id;
+    END IF;
+
+    -- Встановлюємо дату видачі (якщо не вказана, то через 3 дні)
+    IF p_pickup_date IS NULL THEN
+        p_pickup_date := CURRENT_DATE + 3;
+    END IF;
+
+    -- Підтверджуємо бронювання
+    UPDATE public.reservations
+    SET isconfirmed = true,
+        librarianid = p_librarian_id,
+        pickupdate = p_pickup_date
+    WHERE reservationid = p_reservation_id;
+
+    RAISE NOTICE 'Reservation % confirmed. Pickup date: %', p_reservation_id, p_pickup_date;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE public.mark_book_as_lost(
+    p_loan_id integer,
+    p_librarian_id integer
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_book_id integer;
+    v_user_id integer;
+    v_overdue_days integer;
+    v_fine_amount numeric(10,2);
+BEGIN
+    -- Отримуємо дані позики
+    SELECT bookid, userid, (CURRENT_DATE - duedate) INTO v_book_id, v_user_id, v_overdue_days
+    FROM public.loans
+    WHERE loanid = p_loan_id AND isreturned = false;
+
+    IF v_book_id IS NULL THEN
+        RAISE EXCEPTION 'Loan % not found or already returned', p_loan_id;
+    END IF;
+
+    -- Перевіряємо прострочення (мінімум 180 днів = ~6 місяців)
+    IF v_overdue_days < 180 THEN
+        RAISE EXCEPTION 'Book can only be marked as lost after 180 days overdue (current: % days)', v_overdue_days;
+    END IF;
+
+    -- Відмічаємо книгу як втрачену
+    UPDATE public.books
+    SET status = 'Lost'
+    WHERE bookid = v_book_id;
+
+    -- Відмічаємо позику як повернуту (фактично втрачену)
+    UPDATE public.loans
+    SET isreturned = true,
+        returndate = CURRENT_DATE
+    WHERE loanid = p_loan_id;
+
+    -- Додаємо штраф за втрату книги
+    INSERT INTO public.fines (loanid, amount, ispaid, issuedate)
+    VALUES (p_loan_id, 200.00, false, CURRENT_DATE);
+
+    RAISE NOTICE 'Book % marked as lost. Fine of 200.00 added to user %', v_book_id, v_user_id;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE public.delete_book(
+    p_book_id integer
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_book_title character varying(200);
+    v_active_loans integer;
+BEGIN
+    -- Отримуємо назву книги
+    SELECT title INTO v_book_title FROM public.books WHERE bookid = p_book_id;
+
+    IF v_book_title IS NULL THEN
+        RAISE EXCEPTION 'Book % not found', p_book_id;
+    END IF;
+
+    -- Перевіряємо, чи немає активних позик
+    SELECT COUNT(*) INTO v_active_loans
+    FROM public.loans
+    WHERE bookid = p_book_id AND isreturned = false;
+
+    IF v_active_loans > 0 THEN
+        RAISE EXCEPTION 'Cannot delete book "%". It has % active loans', v_book_title, v_active_loans;
+    END IF;
+
+    -- Видаляємо книгу (CASCADE автоматично видалить зв'язки з авторами та жанрами)
+    DELETE FROM public.books WHERE bookid = p_book_id;
+
+    RAISE NOTICE 'Book "%" (ID: %) deleted successfully', v_book_title, p_book_id;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE public.reader_initiate_fine_payment(
+    p_fine_id integer,
+    p_user_id integer
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_fine_user_id integer;
+    v_is_paid boolean;
+    v_payment_initiated boolean;
+BEGIN
+    -- Отримуємо дані штрафу
+    SELECT l.userid, f.ispaid, (f.payment_initiated_date IS NOT NULL)
+    INTO v_fine_user_id, v_is_paid, v_payment_initiated
+    FROM public.fines f
+    JOIN public.loans l ON f.loanid = l.loanid
+    WHERE f.fineid = p_fine_id;
+
+    -- Перевірки
+    IF v_fine_user_id IS NULL THEN
+        RAISE EXCEPTION 'Fine % not found', p_fine_id;
+    END IF;
+
+    IF v_fine_user_id != p_user_id THEN
+        RAISE EXCEPTION 'You can only initiate payment for your own fines';
+    END IF;
+
+    IF v_is_paid THEN
+        RAISE EXCEPTION 'Fine % is already paid', p_fine_id;
+    END IF;
+
+    IF v_payment_initiated THEN
+        RAISE EXCEPTION 'Payment for fine % is already pending confirmation', p_fine_id;
+    END IF;
+
+    -- Відмічаємо, що користувач ініціював оплату
+    UPDATE public.fines
+    SET payment_initiated_date = CURRENT_DATE
+    WHERE fineid = p_fine_id;
+
+    RAISE NOTICE 'Payment initiated for fine %. Waiting for accountant confirmation', p_fine_id;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE public.confirm_fine_payment(
+    p_fine_id integer,
+    p_accountant_id integer,
+    p_approve boolean DEFAULT true
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_payment_initiated boolean;
+    v_is_paid boolean;
+BEGIN
+    -- Отримуємо дані штрафу
+    SELECT (payment_initiated_date IS NOT NULL), ispaid
+    INTO v_payment_initiated, v_is_paid
+    FROM public.fines
+    WHERE fineid = p_fine_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Fine % not found', p_fine_id;
+    END IF;
+
+    IF v_is_paid THEN
+        RAISE EXCEPTION 'Fine % is already confirmed as paid', p_fine_id;
+    END IF;
+
+    IF NOT v_payment_initiated THEN
+        RAISE EXCEPTION 'Payment for fine % has not been initiated by the reader', p_fine_id;
+    END IF;
+
+    IF p_approve THEN
+        -- Підтверджуємо оплату
+        UPDATE public.fines
+        SET ispaid = true,
+            paymentdate = CURRENT_DATE,
+            confirmed_by_accountant_id = p_accountant_id
+        WHERE fineid = p_fine_id;
+
+        RAISE NOTICE 'Payment for fine % confirmed by accountant %', p_fine_id, p_accountant_id;
+    ELSE
+        -- Відхиляємо оплату (скидаємо ініціацію)
+        UPDATE public.fines
+        SET payment_initiated_date = NULL
+        WHERE fineid = p_fine_id;
+
+        RAISE NOTICE 'Payment for fine % rejected by accountant %', p_fine_id, p_accountant_id;
+    END IF;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE public.block_user(
+    p_user_id integer,
+    p_admin_id integer
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_user_name character varying(100);
+BEGIN
+    SELECT fullname INTO v_user_name FROM public.users WHERE userid = p_user_id;
+
+    IF v_user_name IS NULL THEN
+        RAISE EXCEPTION 'User % not found', p_user_id;
+    END IF;
+
+    UPDATE public.users
+    SET isblocked = true
+    WHERE userid = p_user_id;
+
+    RAISE NOTICE 'User % (%) blocked by admin %', v_user_name, p_user_id, p_admin_id;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE public.unblock_user(
+    p_user_id integer,
+    p_admin_id integer
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_user_name character varying(100);
+BEGIN
+    SELECT fullname INTO v_user_name FROM public.users WHERE userid = p_user_id;
+
+    IF v_user_name IS NULL THEN
+        RAISE EXCEPTION 'User % not found', p_user_id;
+    END IF;
+
+    UPDATE public.users
+    SET isblocked = false,
+        violationcount = 0  -- Скидаємо лічильник порушень
+    WHERE userid = p_user_id;
+
+    RAISE NOTICE 'User % (%) unblocked by admin %', v_user_name, p_user_id, p_admin_id;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE public.update_violation_type_cost(
+    p_type_id integer,
+    p_new_cost numeric(10,2),
+    p_admin_id integer
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_type_name character varying(100);
+    v_old_cost numeric(10,2);
+BEGIN
+    SELECT name, cost INTO v_type_name, v_old_cost
+    FROM public.violation_types
+    WHERE typeid = p_type_id;
+
+    IF v_type_name IS NULL THEN
+        RAISE EXCEPTION 'Violation type % not found', p_type_id;
+    END IF;
+
+    UPDATE public.violation_types
+    SET cost = p_new_cost
+    WHERE typeid = p_type_id;
+
+    RAISE NOTICE 'Violation type "%" cost updated from % to % by admin %',
+                 v_type_name, v_old_cost, p_new_cost, p_admin_id;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE public.proc_autoorderbooks(
+    p_supplier character varying DEFAULT 'Постачальник за замовчуванням',
+    p_popularity_threshold float DEFAULT 0.8,
+    p_default_quantity integer DEFAULT 5
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_order_id integer;
+    v_rec RECORD;
+BEGIN
+    -- Створюємо нове замовлення
+    INSERT INTO public.orders (orderdate, supplier, status, totalprice)
+    VALUES (CURRENT_DATE, p_supplier, 'Pending', 0)
+    RETURNING orderid INTO v_order_id;
+
+    -- Знаходимо популярні книги (відношення активних позик до загальної кількості примірників)
+    FOR v_rec IN
+        SELECT
+            pl.pricelistid,
+            pl.booktitle,
+            pl.price,
+            COUNT(l.loanid)::FLOAT / NULLIF(COUNT(DISTINCT b.bookid), 0)::FLOAT AS popularity
+        FROM public.books b
+        LEFT JOIN public.loans l ON b.bookid = l.bookid AND l.isreturned = false
+        JOIN public.price_list pl ON b.title = pl.booktitle
+        WHERE NOT EXISTS (
+            -- Виключаємо книги, які вже замовлені і не доставлені
+            SELECT 1
+            FROM public.orders o
+            JOIN public.order_items oi ON o.orderid = oi.orderid
+            WHERE o.status IN ('Pending', 'In Progress')
+              AND oi.pricelistid = pl.pricelistid
+        )
+        GROUP BY pl.pricelistid, pl.booktitle, pl.price
+        HAVING COUNT(l.loanid)::FLOAT / NULLIF(COUNT(DISTINCT b.bookid), 0)::FLOAT >= p_popularity_threshold
+    LOOP
+        -- Додаємо позицію до замовлення
+        INSERT INTO public.order_items (orderid, pricelistid, quantity)
+        VALUES (v_order_id, v_rec.pricelistid, p_default_quantity);
+
+        RAISE NOTICE 'Added % copies of "%" to order', p_default_quantity, v_rec.booktitle;
+    END LOOP;
+
+    -- Оновлюємо загальну вартість (через тригер це відбудеться автоматично)
+    -- Але якщо замовлення порожнє, видаляємо його
+    IF NOT EXISTS (SELECT 1 FROM public.order_items WHERE orderid = v_order_id) THEN
+        DELETE FROM public.orders WHERE orderid = v_order_id;
+        RAISE NOTICE 'No popular books found for ordering';
+    ELSE
+        RAISE NOTICE 'Order % created successfully with supplier "%"', v_order_id, p_supplier;
+    END IF;
+END;
+$$;
+
 CREATE OR REPLACE FUNCTION public.func_accum_reading(
     state public.reading_state_type,
     issue_date date,
@@ -439,7 +733,6 @@ BEGIN
 END;
 $$;
 
--- Фінальна функція для розрахунку середнього значення
 CREATE OR REPLACE FUNCTION public.func_final_reading(state public.reading_state_type)
 RETURNS double precision
 LANGUAGE plpgsql AS $$
@@ -452,7 +745,7 @@ BEGIN
 END;
 $$;
 
--- Агрегатна функція для розрахунку середньої тривалості читання
+
 CREATE AGGREGATE public.agg_avgreadingduration(date, date) (
     SFUNC = public.func_accum_reading,
     STYPE = public.reading_state_type,
@@ -460,43 +753,75 @@ CREATE AGGREGATE public.agg_avgreadingduration(date, date) (
     FINALFUNC = public.func_final_reading
 );
 
--- ============================================================================
--- ТРИГЕРИ
--- ============================================================================
 
--- Тригер: Перерахунок загальної вартості замовлення
 CREATE TRIGGER trg_calculate_total_cost
     AFTER INSERT OR DELETE OR UPDATE ON public.order_items
     FOR EACH ROW EXECUTE FUNCTION public.update_order_total_cost();
 
--- Тригер: Перевірка доступності книг при видачі
 CREATE TRIGGER trg_checkloans
     BEFORE INSERT ON public.loans
     FOR EACH ROW EXECUTE FUNCTION public.func_checkavailabilitycombined();
 
--- Тригер: Перевірка доступності книг при резервації
 CREATE TRIGGER trg_checkreservations
     BEFORE INSERT ON public.reservations
     FOR EACH ROW EXECUTE FUNCTION public.func_checkavailabilitycombined();
 
--- Тригер: Заборона видачі заблокованим користувачам
 CREATE TRIGGER trg_prevent_loan_if_blocked
     BEFORE INSERT ON public.loans
     FOR EACH ROW EXECUTE FUNCTION public.func_prevent_loan_submission();
 
--- Тригер: Оновлення лічильника порушень
 CREATE TRIGGER trg_update_violation_count_users
     AFTER INSERT OR UPDATE OR DELETE ON public.fines
     FOR EACH ROW EXECUTE FUNCTION public.update_violation_count();
 
--- Тригер: Нарахування штрафу при поверненні
 CREATE TRIGGER trg_calculate_fine_on_return
     BEFORE UPDATE ON public.loans
     FOR EACH ROW EXECUTE FUNCTION public.calculate_fine_on_return();
 
--- ============================================================================
--- ПРАВА ДОСТУПУ ДО ПРОЦЕДУР
--- ============================================================================
+CREATE OR REPLACE FUNCTION public.check_long_overdue_loans() RETURNS trigger
+    LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_overdue_days integer;
+BEGIN
+    -- Перевіряємо тільки для неповернутих позик
+    IF NEW.isreturned = false THEN
+        v_overdue_days := CURRENT_DATE - NEW.duedate;
+
+        -- Якщо прострочення більше 180 днів (6 місяців)
+        IF v_overdue_days >= 180 THEN
+            -- Автоматично маркуємо книгу як втрачену
+            UPDATE public.books
+            SET status = 'Lost'
+            WHERE bookid = NEW.bookid AND status != 'Lost';
+
+            -- Відмічаємо позику як повернуту (фактично втрачену)
+            NEW.isreturned := true;
+            NEW.returndate := CURRENT_DATE;
+
+            -- Додаємо штраф за втрату книги (якщо ще не додано)
+            IF NOT EXISTS (
+                SELECT 1 FROM public.fines
+                WHERE loanid = NEW.loanid
+                  AND amount >= 200.00
+            ) THEN
+                INSERT INTO public.fines (loanid, amount, ispaid, issuedate)
+                VALUES (NEW.loanid, 200.00, false, CURRENT_DATE);
+            END IF;
+
+            RAISE NOTICE 'Loan % automatically marked as lost due to % days overdue', NEW.loanid, v_overdue_days;
+        END IF;
+    END IF;
+
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER trg_auto_mark_lost_books
+    BEFORE UPDATE ON public.loans
+    FOR EACH ROW
+    WHEN (OLD.isreturned = false)
+    EXECUTE FUNCTION public.check_long_overdue_loans();
 
 GRANT EXECUTE ON PROCEDURE public.issue_book TO role_librarian, role_admin;
 GRANT EXECUTE ON PROCEDURE public.return_book TO role_librarian, role_admin;
@@ -506,7 +831,19 @@ GRANT EXECUTE ON PROCEDURE public.update_book TO role_admin, role_librarian;
 GRANT EXECUTE ON PROCEDURE public.pay_fine TO role_reader, role_accountant, role_admin;
 GRANT EXECUTE ON FUNCTION public.login TO PUBLIC;
 
--- Повідомлення про успішне створення
+GRANT EXECUTE ON PROCEDURE public.confirm_reservation TO role_librarian, role_admin;
+GRANT EXECUTE ON PROCEDURE public.mark_book_as_lost TO role_librarian, role_admin;
+GRANT EXECUTE ON PROCEDURE public.delete_book TO role_librarian, role_admin;
+
+GRANT EXECUTE ON PROCEDURE public.reader_initiate_fine_payment TO role_reader, role_librarian, role_accountant, role_admin;
+
+GRANT EXECUTE ON PROCEDURE public.confirm_fine_payment TO role_accountant, role_admin;
+
+GRANT EXECUTE ON PROCEDURE public.block_user TO role_admin;
+GRANT EXECUTE ON PROCEDURE public.unblock_user TO role_admin;
+GRANT EXECUTE ON PROCEDURE public.update_violation_type_cost TO role_admin;
+GRANT EXECUTE ON PROCEDURE public.proc_autoorderbooks TO role_admin;
+
 DO $$
 BEGIN
     RAISE NOTICE 'Функції, процедури та тригери успішно створено!';

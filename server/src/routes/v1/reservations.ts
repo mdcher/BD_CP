@@ -30,6 +30,20 @@ reservationRouter.post(
   ReservationController.complete
 );
 
+// Підтвердити бронювання (тільки для бібліотекарів)
+reservationRouter.post(
+  '/:id/confirm',
+  [checkJwt, checkRole([UserRole.Librarian, UserRole.Admin])],
+  ReservationController.confirm
+);
+
+// Отримати непідтверджені бронювання (для бібліотекарів)
+reservationRouter.get(
+  '/pending',
+  [checkJwt, checkRole([UserRole.Librarian, UserRole.Admin])],
+  ReservationController.getPending
+);
+
 // Скасувати бронювання
 reservationRouter.delete('/:id', [checkJwt], ReservationController.cancel);
 

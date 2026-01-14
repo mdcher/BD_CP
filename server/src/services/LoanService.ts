@@ -35,4 +35,16 @@ export const LoanService = {
     );
     return history;
   },
+
+  // Позначити книгу як втрачену (для бібліотекарів)
+  markAsLost: async (loanId: number, librarianId: number) => {
+    const connection = getConnection();
+    try {
+      // Процедура перевірить, що прострочення >= 180 днів, позначить книгу як Lost та додасть штраф 200 грн
+      await connection.query('CALL public.mark_book_as_lost($1::integer, $2::integer)', [loanId, librarianId]);
+      return { message: 'Book marked as lost successfully.' };
+    } catch (err: any) {
+      throw new CustomError(400, 'Raw', 'Mark as lost failed', [err.message]);
+    }
+  },
 };

@@ -16,7 +16,8 @@ export const UserController = {
   block: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = Number(req.params.id);
-      const result = await UserService.setLockStatus(userId, true);
+      const adminId = req.jwtPayload.id;
+      const result = await UserService.setLockStatus(userId, true, adminId);
       res.customSuccess(200, 'User blocked successfully.', result);
     } catch (err) {
       next(err);
@@ -27,7 +28,8 @@ export const UserController = {
   unblock: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = Number(req.params.id);
-      const result = await UserService.setLockStatus(userId, false);
+      const adminId = req.jwtPayload.id;
+      const result = await UserService.setLockStatus(userId, false, adminId);
       res.customSuccess(200, 'User unblocked successfully.', result);
     } catch (err) {
       next(err);
@@ -61,6 +63,29 @@ export const UserController = {
       const { isBlocked } = req.body;
       const updatedUser = await UserService.toggleBlock(userId, isBlocked);
       res.customSuccess(200, 'User block status updated.', updatedUser);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // Оновити вартість типу порушення (для адмінів)
+  updateViolationCost: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const typeId = Number(req.params.id);
+      const { newCost } = req.body;
+      const adminId = req.jwtPayload.id;
+      const result = await UserService.updateViolationCost(typeId, newCost, adminId);
+      res.customSuccess(200, result.message, result);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // Отримати всі типи порушень
+  getViolationTypes: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const violationTypes = await UserService.getViolationTypes();
+      res.customSuccess(200, 'Violation types.', violationTypes);
     } catch (err) {
       next(err);
     }

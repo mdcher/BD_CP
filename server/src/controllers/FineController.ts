@@ -34,4 +34,49 @@ export const FineController = {
       next(err);
     }
   },
+
+  // Ініціювати оплату штрафу (для читачів)
+  initiatePayment: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const fineId = Number(req.params.id);
+      const userId = req.jwtPayload.id;
+      const result = await FineService.initiatePayment(fineId, userId);
+      res.customSuccess(200, result.message, result);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // Підтвердити оплату штрафу (для бухгалтерів)
+  confirmPayment: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const fineId = Number(req.params.id);
+      const accountantId = req.jwtPayload.id;
+      const { approve } = req.body; // true або false
+      const result = await FineService.confirmPayment(fineId, accountantId, approve !== false);
+      res.customSuccess(200, result.message, result);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // Отримати непідтверджені платежі (для бухгалтерів)
+  getPendingPayments: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const payments = await FineService.getPendingPayments();
+      res.customSuccess(200, 'Pending fine payments.', payments);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // Отримати статистику штрафів (для адмінів/бухгалтерів)
+  getStatistics: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const statistics = await FineService.getStatistics();
+      res.customSuccess(200, 'Fine statistics.', statistics);
+    } catch (err) {
+      next(err);
+    }
+  },
 };

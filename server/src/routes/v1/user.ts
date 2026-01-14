@@ -43,4 +43,18 @@ userRouter.put(
     UserController.updateUser
 );
 
+// Отримати всі типи порушень
+userRouter.get(
+    '/violation-types',
+    [checkJwt, checkRole([UserRole.Admin])],
+    UserController.getViolationTypes
+);
+
+// Оновити вартість типу порушення (тільки Адмін)
+userRouter.put(
+    '/violation-types/:id',
+    [checkJwt, checkRole([UserRole.Admin])],
+    UserController.updateViolationCost
+);
+
 export default userRouter;
