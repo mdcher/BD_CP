@@ -73,10 +73,14 @@ export const useInitiatePayment = (): UseMutationResult<void, Error, number> => 
 		onSuccess: () => {
 			toast.success("Оплату ініційовано. Очікуйте підтвердження бухгалтера.");
 			void queryClient.invalidateQueries({ queryKey: ["fines", "my-unpaid"] });
+			void queryClient.invalidateQueries({ queryKey: ["fines", "pending-payments"] });
 		},
-		onError: (error) => {
+		onError: (error: any) => {
 			console.error("Помилка ініціації оплати:", error);
-			toast.error("Не вдалося ініціювати оплату.");
+			// Перевіряємо, чи це справжня помилка
+			if (error?.response?.status !== 200) {
+				toast.error("Не вдалося ініціювати оплату.");
+			}
 		},
 	});
 };

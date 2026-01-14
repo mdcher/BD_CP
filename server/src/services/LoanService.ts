@@ -7,7 +7,8 @@ export const LoanService = {
     const connection = getConnection();
     try {
       // Процедура в БД сама перевірить права бібліотекаря
-      await connection.query('CALL public.issue_book($1::integer, $2::integer, $3::integer, $4::integer)', [userId, bookId, days, librarianId]);
+      // Параметри: p_user_id, p_book_id, p_librarian_id, p_days
+      await connection.query('CALL public.issue_book($1::integer, $2::integer, $3::integer, $4::integer)', [userId, bookId, librarianId, days]);
       return { message: 'Book issued successfully.' };
     } catch (err: any) {
       throw new CustomError(400, 'Raw', 'Issue book failed', [err.message]);
@@ -19,7 +20,8 @@ export const LoanService = {
     const connection = getConnection();
     try {
       // Процедура сама оновить статус і нарахує штраф, якщо потрібно
-      await connection.query('CALL public.return_book($1::integer, $2::integer)', [loanId, librarianId]);
+      // Процедура приймає тільки один параметр: p_loan_id
+      await connection.query('CALL public.return_book($1::integer)', [loanId]);
       return { message: 'Book returned successfully.' };
     } catch (err: any) {
       throw new CustomError(400, 'Raw', 'Return book failed', [err.message]);

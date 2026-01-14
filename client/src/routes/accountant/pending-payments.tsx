@@ -57,7 +57,7 @@ function PendingPaymentsPage(): React.JSX.Element {
 		);
 	}
 
-	const totalAmount = fines?.reduce((sum, fine) => sum + fine.amount, 0) ?? 0;
+	const totalAmount = fines?.reduce((sum, fine) => sum + Number(fine.amount || 0), 0) ?? 0;
 
 	return (
 		<div className="space-y-8 animate-in fade-in duration-500">

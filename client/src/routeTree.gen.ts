@@ -46,10 +46,11 @@ import { Route as GenresGenreIdRouteImport } from './routes/genres/$genreId'
 import { Route as EmployeesCreateRouteImport } from './routes/employees/create'
 import { Route as EmployeesEmployeeIdRouteImport } from './routes/employees/$employeeId'
 import { Route as BooksCreateRouteImport } from './routes/books/create'
-import { Route as BooksBookIdRouteImport } from './routes/books.$bookId'
+import { Route as BooksBookIdRouteImport } from './routes/books/$bookId'
 import { Route as AuthorsCreateRouteImport } from './routes/authors/create'
 import { Route as AuthorsAuthorIdRouteImport } from './routes/authors/$authorId'
 import { Route as AdminUsersRouteImport } from './routes/admin/users'
+import { Route as AdminOrdersRouteImport } from './routes/admin/orders'
 import { Route as AccountantPendingPaymentsRouteImport } from './routes/accountant/pending-payments'
 import { Route as AccountantFinancialsRouteImport } from './routes/accountant/financials'
 import { Route as AdminUsersCreateRouteImport } from './routes/admin/users/create'
@@ -260,6 +261,11 @@ const AdminUsersRoute = AdminUsersRouteImport.update({
   path: '/admin/users',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminOrdersRoute = AdminOrdersRouteImport.update({
+  id: '/admin/orders',
+  path: '/admin/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AccountantPendingPaymentsRoute =
   AccountantPendingPaymentsRouteImport.update({
     id: '/accountant/pending-payments',
@@ -291,6 +297,7 @@ export interface FileRoutesByFullPath {
   '/users': typeof UsersRouteWithChildren
   '/accountant/financials': typeof AccountantFinancialsRoute
   '/accountant/pending-payments': typeof AccountantPendingPaymentsRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/admin/users': typeof AdminUsersRouteWithChildren
   '/authors/$authorId': typeof AuthorsAuthorIdRoute
   '/authors/create': typeof AuthorsCreateRoute
@@ -332,6 +339,7 @@ export interface FileRoutesByTo {
   '/users': typeof UsersRouteWithChildren
   '/accountant/financials': typeof AccountantFinancialsRoute
   '/accountant/pending-payments': typeof AccountantPendingPaymentsRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/admin/users': typeof AdminUsersRouteWithChildren
   '/authors/$authorId': typeof AuthorsAuthorIdRoute
   '/authors/create': typeof AuthorsCreateRoute
@@ -379,6 +387,7 @@ export interface FileRoutesById {
   '/users': typeof UsersRouteWithChildren
   '/accountant/financials': typeof AccountantFinancialsRoute
   '/accountant/pending-payments': typeof AccountantPendingPaymentsRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/admin/users': typeof AdminUsersRouteWithChildren
   '/authors/$authorId': typeof AuthorsAuthorIdRoute
   '/authors/create': typeof AuthorsCreateRoute
@@ -427,6 +436,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/accountant/financials'
     | '/accountant/pending-payments'
+    | '/admin/orders'
     | '/admin/users'
     | '/authors/$authorId'
     | '/authors/create'
@@ -468,6 +478,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/accountant/financials'
     | '/accountant/pending-payments'
+    | '/admin/orders'
     | '/admin/users'
     | '/authors/$authorId'
     | '/authors/create'
@@ -514,6 +525,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/accountant/financials'
     | '/accountant/pending-payments'
+    | '/admin/orders'
     | '/admin/users'
     | '/authors/$authorId'
     | '/authors/create'
@@ -561,6 +573,7 @@ export interface RootRouteChildren {
   UsersRoute: typeof UsersRouteWithChildren
   AccountantFinancialsRoute: typeof AccountantFinancialsRoute
   AccountantPendingPaymentsRoute: typeof AccountantPendingPaymentsRoute
+  AdminOrdersRoute: typeof AdminOrdersRoute
   AdminUsersRoute: typeof AdminUsersRouteWithChildren
   LibrarianIssueReturnRoute: typeof LibrarianIssueReturnRoute
   LibrarianPendingReservationsRoute: typeof LibrarianPendingReservationsRoute
@@ -860,6 +873,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/orders': {
+      id: '/admin/orders'
+      path: '/admin/orders'
+      fullPath: '/admin/orders'
+      preLoaderRoute: typeof AdminOrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/accountant/pending-payments': {
       id: '/accountant/pending-payments'
       path: '/accountant/pending-payments'
@@ -1007,6 +1027,7 @@ const rootRouteChildren: RootRouteChildren = {
   UsersRoute: UsersRouteWithChildren,
   AccountantFinancialsRoute: AccountantFinancialsRoute,
   AccountantPendingPaymentsRoute: AccountantPendingPaymentsRoute,
+  AdminOrdersRoute: AdminOrdersRoute,
   AdminUsersRoute: AdminUsersRouteWithChildren,
   LibrarianIssueReturnRoute: LibrarianIssueReturnRoute,
   LibrarianPendingReservationsRoute: LibrarianPendingReservationsRoute,

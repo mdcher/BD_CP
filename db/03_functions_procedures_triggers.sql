@@ -1,32 +1,57 @@
 SET client_encoding = 'UTF8';
 
-CREATE OR REPLACE FUNCTION public.update_violation_count() RETURNS trigger
+CREATE OR REPLACE FUNCTION public.update_violation_count()
+    RETURNS trigger
     LANGUAGE plpgsql
 AS $$
+DECLARE
+    _new_user_id INT;
+    _old_user_id INT;
 BEGIN
     IF (TG_OP = 'INSERT') THEN
-        UPDATE users
-        SET
-            violationcount = violationcount + 1,
-            isblocked = CASE
-                            WHEN (violationcount + 1) >= 3 THEN TRUE
-                            ELSE isblocked
-                END
-        WHERE userid = NEW.userid;
+        SELECT userid INTO _new_user_id FROM loans WHERE loanid = NEW.loanid;
+
+        IF _new_user_id IS NOT NULL THEN
+            UPDATE users
+            SET
+                violationcount = violationcount + 1,
+                isblocked = CASE
+                                WHEN (violationcount + 1) >= 3 THEN TRUE
+                                ELSE isblocked
+                    END
+            WHERE userid = _new_user_id;
+        END IF;
 
     ELSIF (TG_OP = 'DELETE') THEN
-        UPDATE users
-        SET violationcount = GREATEST(violationcount - 1, 0)
-        WHERE userid = OLD.userid;
+        SELECT userid INTO _old_user_id FROM loans WHERE loanid = OLD.loanid;
 
-    ELSIF (TG_OP = 'UPDATE') AND (OLD.userid IS DISTINCT FROM NEW.userid) THEN
-        UPDATE users SET violationcount = GREATEST(violationcount - 1, 0) WHERE userid = OLD.userid;
-        UPDATE users
-        SET
-            violationcount = violationcount + 1,
-            isblocked = CASE WHEN (violationcount + 1) >= 3 THEN TRUE ELSE isblocked END
-        WHERE userid = NEW.userid;
+        IF _old_user_id IS NOT NULL THEN
+            UPDATE users
+            SET violationcount = GREATEST(violationcount - 1, 0)
+            WHERE userid = _old_user_id;
+        END IF;
+
+    ELSIF (TG_OP = 'UPDATE') THEN
+        SELECT userid INTO _old_user_id FROM loans WHERE loanid = OLD.loanid;
+        SELECT userid INTO _new_user_id FROM loans WHERE loanid = NEW.loanid;
+
+        IF (_old_user_id IS DISTINCT FROM _new_user_id) THEN
+
+            IF _old_user_id IS NOT NULL THEN
+                UPDATE users SET violationcount = GREATEST(violationcount - 1, 0)
+                WHERE userid = _old_user_id;
+            END IF;
+
+            IF _new_user_id IS NOT NULL THEN
+                UPDATE users
+                SET
+                    violationcount = violationcount + 1,
+                    isblocked = CASE WHEN (violationcount + 1) >= 3 THEN TRUE ELSE isblocked END
+                WHERE userid = _new_user_id;
+            END IF;
+        END IF;
     END IF;
+
     RETURN NULL;
 END;
 $$;

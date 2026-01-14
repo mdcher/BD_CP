@@ -13,7 +13,6 @@ function BooksPage(): React.JSX.Element {
 
 	const isAdminOrLibrarian =
 		isAuthenticated && (user?.role === "Admin" || user?.role === "Librarian");
-	const isReader = isAuthenticated && user?.role === "Reader";
 
 	const filteredBooks = books?.filter((book) => {
 		const query = searchQuery.toLowerCase();
@@ -171,7 +170,7 @@ function BooksPage(): React.JSX.Element {
 										</button>
 									</>
 								)}
-								{isReader && (
+								{isAuthenticated && (
 									<button
 										className="w-full rounded-lg bg-green-500 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-600"
 										onClick={() => {

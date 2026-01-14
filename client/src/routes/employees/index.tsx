@@ -1,12 +1,16 @@
 import type * as React from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEmployees, useDeleteEmployee } from "@/features/employees/employeesApi.ts";
+import { useAuthStore } from "@/store/authStore";
 import { useState } from "react";
 
 function EmployeesPage(): React.JSX.Element {
 	const { data: employees, isLoading, isError } = useEmployees();
 	const deleteEmployeeMutation = useDeleteEmployee();
+	const { user } = useAuthStore();
 	const [searchQuery, setSearchQuery] = useState("");
+
+	const isAdmin = user?.role === "Admin";
 
 	const filteredEmployees = employees?.filter((employee) => {
 		const query = searchQuery.toLowerCase();
@@ -42,15 +46,17 @@ function EmployeesPage(): React.JSX.Element {
 			<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 				<div>
 					<h1 className="text-3xl font-bold text-slate-900">Співробітники</h1>
-					<p className="text-slate-500">Управління співробітниками бібліотеки</p>
+					<p className="text-slate-500">{isAdmin ? "Управління співробітниками бібліотеки" : "Перегляд зарплат співробітників"}</p>
 				</div>
 
-				<Link
-					className="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-all hover:bg-indigo-700 active:scale-95"
-					to="/employees/create"
-				>
-					<span>➕</span> Додати співробітника
-				</Link>
+				{isAdmin && (
+					<Link
+						className="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-all hover:bg-indigo-700 active:scale-95"
+						to="/employees/create"
+					>
+						<span>➕</span> Додати співробітника
+					</Link>
+				)}
 			</div>
 
 			<div className="relative">
@@ -127,23 +133,27 @@ function EmployeesPage(): React.JSX.Element {
 										{Number(employee.calculatedsalary).toFixed(2)} грн
 									</td>
 									<td className="whitespace-nowrap px-6 py-4 text-right text-sm">
-										<div className="flex justify-end gap-2">
-											<Link
-												className="rounded-lg border border-indigo-100 bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-600 transition-colors hover:bg-indigo-100 hover:text-indigo-700"
-												to="/employees/$employeeId"
-												params={{ employeeId: String(employee.employeeid) }}
-											>
-												Редагувати
-											</Link>
-											<button
-												className="rounded-lg border border-red-100 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100 hover:text-red-700"
-												onClick={() => {
-													handleDelete(employee.employeeid);
-												}}
-											>
-												Видалити
-											</button>
-										</div>
+										{isAdmin ? (
+											<div className="flex justify-end gap-2">
+												<Link
+													className="rounded-lg border border-indigo-100 bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-600 transition-colors hover:bg-indigo-100 hover:text-indigo-700"
+													to="/employees/$employeeId"
+													params={{ employeeId: String(employee.employeeid) }}
+												>
+													Редагувати
+												</Link>
+												<button
+													className="rounded-lg border border-red-100 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100 hover:text-red-700"
+													onClick={() => {
+														handleDelete(employee.employeeid);
+													}}
+												>
+													Видалити
+												</button>
+											</div>
+										) : (
+											<span className="text-sm text-slate-400">—</span>
+										)}
 									</td>
 								</tr>
 							))

@@ -40,7 +40,6 @@ INSERT INTO public.authors (fullname) VALUES
 ('Agatha Christie'),
 ('Dan Brown');
 
--- Пароль для всіх тестових користувачів: password123
 INSERT INTO public.users (fullname, role, dateofbirth, contactinfo, password_hash) VALUES
 ('Іван Іванов', 'Reader', '1995-05-15', 'ivan@mail.com', '$2a$10$gs12d4QKQ4vv8lWlKAIEAusoZ9M4.W9Nd051j0q4iSOTsOQM77.4a'),
 ('Марія Петренко', 'Reader', '1998-08-20', 'maria@mail.com', '$2a$10$gs12d4QKQ4vv8lWlKAIEAusoZ9M4.W9Nd051j0q4iSOTsOQM77.4a'),

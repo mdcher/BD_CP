@@ -96,7 +96,7 @@ function FinancialReportPage(): React.JSX.Element {
 							<div
 								className={`text-3xl font-bold ${stat.textColor}`}
 							>
-								{stat.value.toFixed(2)} грн
+								{Number(stat.value).toFixed(2)} грн
 							</div>
 						</div>
 					</div>

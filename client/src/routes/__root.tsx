@@ -77,6 +77,7 @@ function RootComponent(): React.JSX.Element {
 									{(user?.role === 'Accountant' || user?.role === 'Admin') && (
 										<>
 											<Link to="/accountant/pending-payments" activeProps={{ className: "bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200" }} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">Оплати штрафів</Link>
+											<Link to="/employees" activeProps={{ className: "bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200" }} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">Зарплати</Link>
 										</>
 									)}
 
@@ -85,6 +86,7 @@ function RootComponent(): React.JSX.Element {
 										<>
 											<Link to="/employees" activeProps={{ className: "bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200" }} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">Співробітники</Link>
 											<Link to="/admin/users" activeProps={{ className: "bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200" }} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">Користувачі</Link>
+											<Link to="/admin/orders" activeProps={{ className: "bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200" }} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">Замовлення</Link>
 										</>
 									)}
 
