@@ -1,103 +1,42 @@
-import type * as React from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useTopReaders } from "@/features/reports/reportsApi.ts";
+import { useTopReaders } from "@/features/reports/reportsApi";
 
-function TopReadersPage(): React.JSX.Element {
+function TopReadersPage() {
 	const { data: readers, isLoading, isError } = useTopReaders(10);
 
-	if (isLoading) {
-		return (
-			<div className="flex h-64 items-center justify-center">
-				<div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
-			</div>
-		);
-	}
-
-	if (isError) {
-		return (
-			<div className="rounded-lg bg-red-50 p-4 text-red-600">
-				Помилка завантаження звіту.
-			</div>
-		);
-	}
+	if (isLoading) return <div className="p-8 text-center">Завантаження...</div>;
+	if (isError) return <div className="p-8 text-center text-red-600">Помилка</div>;
 
 	return (
-		<div className="space-y-8 animate-in fade-in duration-500">
+		<div className="space-y-6">
 			<div>
-				<Link
-					to="/reports"
-					className="mb-4 inline-flex items-center gap-2 text-sm text-slate-600 transition-colors hover:text-indigo-600"
-				>
+				<Link to="/reports" className="mb-4 inline-flex items-center gap-2 text-sm text-slate-600 hover:text-indigo-600">
 					← Повернутися до звітів
 				</Link>
 				<h1 className="text-3xl font-bold text-slate-900">Топ читачів</h1>
-				<p className="text-slate-500">10 найактивніших користувачів</p>
 			</div>
 
-			<div className="overflow-hidden rounded-lg bg-white shadow-md">
-				<table className="w-full">
-					<thead className="bg-slate-50">
-						<tr>
-							<th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-700">
-								Місце
-							</th>
-							<th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-700">
-								Читач
-							</th>
-							<th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-700">
-								Контакт
-							</th>
-							<th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-700">
-								Прочитано книг
-							</th>
-							<th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-700">
-								Середня тривалість
-							</th>
-						</tr>
-					</thead>
-					<tbody className="divide-y divide-slate-200">
-						{readers?.length === 0 ? (
-							<tr>
-								<td colSpan={5} className="py-12 text-center text-slate-500">
-									Немає даних
-								</td>
-							</tr>
-						) : (
-							readers?.map((reader, index) => (
-								<tr
-									key={index}
-									className="transition-colors hover:bg-slate-50"
-								>
-									<td className="whitespace-nowrap px-6 py-4 text-sm">
-										{index + 1 <= 3 ? (
-											<span className="text-2xl">
-												{index + 1 === 1 ? "🥇" : index + 1 === 2 ? "🥈" : "🥉"}
-											</span>
-										) : (
-											<span className="font-medium text-slate-700">
-												#{index + 1}
-											</span>
-										)}
-									</td>
-									<td className="px-6 py-4 text-sm font-medium text-slate-900">
-										{reader.fullname}
-									</td>
-									<td className="px-6 py-4 text-sm text-slate-600">
-										{reader.contactinfo}
-									</td>
-									<td className="whitespace-nowrap px-6 py-4 text-right text-sm">
-										<span className="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">
-											{reader.total_books_read} книг
-										</span>
-									</td>
-									<td className="whitespace-nowrap px-6 py-4 text-right text-sm text-slate-600">
-										{(reader.avg_reading_duration_days ?? 0).toFixed(1)} днів
-									</td>
-								</tr>
-							))
-						)}
-					</tbody>
-				</table>
+			<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+				{readers?.map((reader, index) => (
+					<div key={index} className="relative overflow-hidden rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-900/5 transition-hover hover:shadow-md">
+						<div className="absolute right-0 top-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-indigo-50 opacity-50" />
+						<div className="relative">
+							<div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-100 text-xl font-bold text-indigo-700">
+								{index + 1}
+							</div>
+							<h3 className="text-lg font-bold text-slate-900">{reader.fullname}</h3>
+							<p className="text-sm text-slate-500">{reader.contactinfo}</p>
+
+							<div className="mt-6 flex items-baseline gap-2">
+								<span className="text-3xl font-bold text-slate-900">{reader.total_books_read}</span>
+								<span className="text-sm font-medium text-slate-600">книг прочитано</span>
+							</div>
+							<div className="mt-2 text-xs text-slate-400">
+								Сер. час читання: {reader.avg_days_per_book} дн.
+							</div>
+						</div>
+					</div>
+				))}
 			</div>
 		</div>
 	);

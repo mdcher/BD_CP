@@ -1,28 +1,21 @@
-import type * as React from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useDebtorsReport } from "@/features/reports/reportsApi.ts";
+import { useDebtorsReport } from "../../features/reports/reportsApi";
+import { format } from "date-fns";
+import { uk } from "date-fns/locale";
 
-function DebtorsReportPage(): React.JSX.Element {
+function DebtorsReportPage() {
 	const { data: debtors, isLoading, isError } = useDebtorsReport();
 
 	if (isLoading) {
-		return (
-			<div className="flex h-64 items-center justify-center">
-				<div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
-			</div>
-		);
+		return <div className="p-8 text-center">Завантаження...</div>;
 	}
 
 	if (isError) {
-		return (
-			<div className="rounded-lg bg-red-50 p-4 text-red-600">
-				Помилка завантаження звіту.
-			</div>
-		);
+		return <div className="p-8 text-center text-red-600">Помилка завантаження звіту</div>;
 	}
 
 	return (
-		<div className="space-y-8 animate-in fade-in duration-500">
+		<div className="space-y-6">
 			<div>
 				<Link
 					to="/reports"
@@ -30,72 +23,52 @@ function DebtorsReportPage(): React.JSX.Element {
 				>
 					← Повернутися до звітів
 				</Link>
-				<h1 className="text-3xl font-bold text-slate-900">Боржники</h1>
-				<p className="text-slate-500">Користувачі з простроченими книгами</p>
+				<h1 className="text-3xl font-bold text-slate-900">Активні боржники</h1>
+				<p className="text-slate-500">Користувачі, які мають прострочені книги</p>
 			</div>
 
-			<div className="rounded-lg bg-red-50 p-4">
-				<p className="text-sm text-red-800">
-					⚠️ Всього боржників: <span className="font-bold">{debtors?.length || 0}</span>
-				</p>
-			</div>
-
-			<div className="overflow-hidden rounded-lg bg-white shadow-md">
-				<table className="w-full">
-					<thead className="bg-slate-50">
+			<div className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-900/5">
+				<div className="overflow-x-auto">
+					<table className="w-full text-left text-sm text-slate-600">
+						<thead className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase text-slate-500">
 						<tr>
-							<th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-700">
-								Користувач
-							</th>
-							<th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-700">
-								Контакт
-							</th>
-							<th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-700">
-								Книга
-							</th>
-							<th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-700">
-								Дата повернення
-							</th>
-							<th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-700">
-								Прострочено (днів)
-							</th>
+							<th className="px-6 py-4">Ім'я</th>
+							<th className="px-6 py-4">Контакти</th>
+							<th className="px-6 py-4">Книга</th>
+							<th className="px-6 py-4">Дата повернення</th>
+							<th className="px-6 py-4">Прострочення</th>
 						</tr>
-					</thead>
-					<tbody className="divide-y divide-slate-200">
-						{debtors?.length === 0 ? (
-							<tr>
-								<td colSpan={5} className="py-12 text-center text-slate-500">
-									🎉 Немає боржників!
+						</thead>
+						<tbody className="divide-y divide-slate-100">
+						{debtors?.map((debtor, index) => (
+							<tr key={index} className="transition-colors hover:bg-slate-50">
+								<td className="px-6 py-4 font-medium text-slate-900">
+									{debtor.fullname}
+								</td>
+								<td className="px-6 py-4">{debtor.contactinfo}</td>
+								<td className="px-6 py-4">{debtor.book_title}</td>
+								<td className="px-6 py-4">
+									{debtor.duedate
+										? format(new Date(debtor.duedate), "d MMMM yyyy", { locale: uk })
+										: "-"}
+								</td>
+								<td className="px-6 py-4">
+                    <span className="inline-flex items-center rounded-full bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10">
+                      {debtor.days_overdue} дн.
+                    </span>
 								</td>
 							</tr>
-						) : (
-							debtors?.map((debtor, index) => (
-								<tr
-									key={index}
-									className="transition-colors hover:bg-red-50"
-								>
-									<td className="px-6 py-4 text-sm font-medium text-slate-900">
-										{debtor.fullname}
-									</td>
-									<td className="px-6 py-4 text-sm text-slate-600">
-										{debtor.contactinfo}
-									</td>
-									<td className="px-6 py-4 text-sm text-slate-900">
-										{debtor.book_title}
-									</td>
-									<td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
-										{new Date(debtor.duedate).toLocaleDateString("uk-UA")}
-									</td>
-									<td className="whitespace-nowrap px-6 py-4 text-sm">
-										<span className="inline-flex rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800">
-											{debtor.days_overdue} днів
-										</span>
-									</td>
-								</tr>
-							))
+						))}
+						{(!debtors || debtors.length === 0) && (
+							<tr>
+								<td colSpan={5} className="px-6 py-8 text-center text-slate-500">
+									Боржників не знайдено 🎉
+								</td>
+							</tr>
 						)}
-					</tbody>
-				</table>
+						</tbody>
+					</table>
+				</div>
 			</div>
 		</div>
 	);

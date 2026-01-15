@@ -12,36 +12,42 @@ import type {
 	TopReader,
 } from "./types";
 
+// Helper function to handle the response correctly considering the axios interceptor
+const getData = async <T>(url: string): Promise<T> => {
+	// Axios interceptor in lib/axios.ts already unwraps 'response.data.data' into 'response.data'
+	// So response.data IS the data we need.
+	const response = await apiClient.get<any>(url);
+	return response.data as T;
+};
+
 const getDebtorsReport = async (): Promise<Array<Debtor>> => {
-	const response = await apiClient.get<{ message: string; data: Array<Debtor> }>("/reports/debtors");
-	return response.data.data || [];
+	const data = await getData<Array<Debtor>>("/reports/debtors");
+	return data || [];
 };
 
 const getFinancialSummary = async (): Promise<FinancialSummary | null> => {
-	const response = await apiClient.get<{ message: string; data: FinancialSummary }>("/reports/financial-summary");
-	return response.data.data || null;
+	const data = await getData<FinancialSummary>("/reports/financial-summary");
+	return data || null;
 };
 
 const getAuthorRatings = async (): Promise<Array<AuthorRating>> => {
-	const response = await apiClient.get<{ message: string; data: Array<AuthorRating> }>("/reports/author-ratings");
-	return response.data.data || [];
+	const data = await getData<Array<AuthorRating>>("/reports/author-ratings");
+	return data || [];
 };
 
 const getGenrePopularity = async (): Promise<Array<GenrePopularity>> => {
-	const response = await apiClient.get<{ message: string; data: Array<GenrePopularity> }>("/reports/genre-popularity");
-	return response.data.data || [];
+	const data = await getData<Array<GenrePopularity>>("/reports/genre-popularity");
+	return data || [];
 };
 
 const getReadingStatistics = async (): Promise<Array<ReadingStatistic>> => {
-	const response = await apiClient.get<{ message: string; data: Array<ReadingStatistic> }>("/reports/reading-statistics");
-	return response.data.data || [];
+	const data = await getData<Array<ReadingStatistic>>("/reports/reading-statistics");
+	return data || [];
 };
 
 const getTopReaders = async (limit: number = 10): Promise<Array<TopReader>> => {
-	const response = await apiClient.get<{ message: string; data: Array<TopReader> }>(
-		`/reports/top-readers?limit=${limit}`
-	);
-	return response.data.data || [];
+	const data = await getData<Array<TopReader>>(`/reports/top-readers?limit=${limit}`);
+	return data || [];
 };
 
 export const useDebtorsReport = (): UseQueryResult<Array<Debtor>, Error> => {

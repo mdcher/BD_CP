@@ -1,91 +1,36 @@
-import type * as React from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useAuthorRatings } from "@/features/reports/reportsApi.ts";
+import { useAuthorRatings } from "@/features/reports/reportsApi";
 
-function AuthorRatingsPage(): React.JSX.Element {
-	const { data: ratings, isLoading, isError } = useAuthorRatings();
+function AuthorRatingsPage() {
+	const { data: authors, isLoading, isError } = useAuthorRatings();
 
-	if (isLoading) {
-		return (
-			<div className="flex h-64 items-center justify-center">
-				<div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
-			</div>
-		);
-	}
-
-	if (isError) {
-		return (
-			<div className="rounded-lg bg-red-50 p-4 text-red-600">
-				Помилка завантаження звіту.
-			</div>
-		);
-	}
+	if (isLoading) return <div className="p-8 text-center">Завантаження...</div>;
+	if (isError) return <div className="p-8 text-center text-red-600">Помилка</div>;
 
 	return (
-		<div className="space-y-8 animate-in fade-in duration-500">
+		<div className="space-y-6">
 			<div>
-				<Link
-					to="/reports"
-					className="mb-4 inline-flex items-center gap-2 text-sm text-slate-600 transition-colors hover:text-indigo-600"
-				>
+				<Link to="/reports" className="mb-4 inline-flex items-center gap-2 text-sm text-slate-600 hover:text-indigo-600">
 					← Повернутися до звітів
 				</Link>
 				<h1 className="text-3xl font-bold text-slate-900">Рейтинг авторів</h1>
-				<p className="text-slate-500">Популярність авторів за кількістю книг</p>
 			</div>
 
-			<div className="overflow-hidden rounded-lg bg-white shadow-md">
-				<table className="w-full">
-					<thead className="bg-slate-50">
-						<tr>
-							<th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-700">
-								Рейтинг
-							</th>
-							<th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-700">
-								Автор
-							</th>
-							<th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-700">
-								Кількість книг
-							</th>
-						</tr>
-					</thead>
-					<tbody className="divide-y divide-slate-200">
-						{ratings?.length === 0 ? (
-							<tr>
-								<td colSpan={3} className="py-12 text-center text-slate-500">
-									Немає даних
-								</td>
-							</tr>
-						) : (
-							ratings?.map((rating, index) => (
-								<tr
-									key={index}
-									className="transition-colors hover:bg-slate-50"
-								>
-									<td className="whitespace-nowrap px-6 py-4 text-sm">
-										{rating.rank_by_books <= 3 ? (
-											<span className="text-2xl">
-												{rating.rank_by_books === 1 ? "🥇" : rating.rank_by_books === 2 ? "🥈" : "🥉"}
-											</span>
-										) : (
-											<span className="font-medium text-slate-700">
-												#{rating.rank_by_books}
-											</span>
-										)}
-									</td>
-									<td className="px-6 py-4 text-sm font-medium text-slate-900">
-										{rating.fullname}
-									</td>
-									<td className="whitespace-nowrap px-6 py-4 text-right text-sm">
-										<span className="inline-flex rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-800">
-											{rating.total_books} книг
-										</span>
-									</td>
-								</tr>
-							))
-						)}
-					</tbody>
-				</table>
+			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+				{authors?.map((author, index) => (
+					<div key={index} className="flex items-center justify-between rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-900/5">
+						<div className="flex items-center gap-4">
+							<div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-50 font-bold text-indigo-600">
+								#{author.rank_by_books}
+							</div>
+							<div>
+								<h3 className="font-semibold text-slate-900">{author.fullname}</h3>
+								<p className="text-sm text-slate-500">Книг у бібліотеці</p>
+							</div>
+						</div>
+						<div className="text-2xl font-bold text-slate-900">{author.total_books}</div>
+					</div>
+				))}
 			</div>
 		</div>
 	);

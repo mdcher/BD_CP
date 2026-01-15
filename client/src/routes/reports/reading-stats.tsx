@@ -1,81 +1,40 @@
-import type * as React from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useReadingStatistics } from "@/features/reports/reportsApi.ts";
+import { useReadingStatistics } from "@/features/reports/reportsApi";
 
-function ReadingStatsPage(): React.JSX.Element {
+function ReadingStatsPage() {
 	const { data: stats, isLoading, isError } = useReadingStatistics();
 
-	if (isLoading) {
-		return (
-			<div className="flex h-64 items-center justify-center">
-				<div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
-			</div>
-		);
-	}
-
-	if (isError) {
-		return (
-			<div className="rounded-lg bg-red-50 p-4 text-red-600">
-				Помилка завантаження звіту.
-			</div>
-		);
-	}
+	if (isLoading) return <div className="p-8 text-center">Завантаження...</div>;
+	if (isError) return <div className="p-8 text-center text-red-600">Помилка</div>;
 
 	return (
-		<div className="space-y-8 animate-in fade-in duration-500">
+		<div className="space-y-6">
 			<div>
-				<Link
-					to="/reports"
-					className="mb-4 inline-flex items-center gap-2 text-sm text-slate-600 transition-colors hover:text-indigo-600"
-				>
+				<Link to="/reports" className="mb-4 inline-flex items-center gap-2 text-sm text-slate-600 hover:text-indigo-600">
 					← Повернутися до звітів
 				</Link>
 				<h1 className="text-3xl font-bold text-slate-900">Статистика читання</h1>
-				<p className="text-slate-500">Середня тривалість читання по користувачам</p>
 			</div>
 
-			<div className="overflow-hidden rounded-lg bg-white shadow-md">
-				<table className="w-full">
-					<thead className="bg-slate-50">
-						<tr>
-							<th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-700">
-								Користувач
-							</th>
-							<th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-700">
-								Всього видач
-							</th>
-							<th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-700">
-								Середня тривалість (днів)
-							</th>
-						</tr>
+			<div className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-900/5">
+				<table className="w-full text-left text-sm text-slate-600">
+					<thead className="bg-slate-50 text-xs font-semibold uppercase text-slate-500">
+					<tr>
+						<th className="px-6 py-4">Читач</th>
+						<th className="px-6 py-4 text-center">Прочитано книг</th>
+						<th className="px-6 py-4 text-right">Середній час читання (дні)</th>
+					</tr>
 					</thead>
-					<tbody className="divide-y divide-slate-200">
-						{stats?.length === 0 ? (
-							<tr>
-								<td colSpan={3} className="py-12 text-center text-slate-500">
-									Немає даних
-								</td>
-							</tr>
-						) : (
-							stats?.map((stat, index) => (
-								<tr
-									key={index}
-									className="transition-colors hover:bg-slate-50"
-								>
-									<td className="px-6 py-4 text-sm font-medium text-slate-900">
-										{stat.fullname}
-									</td>
-									<td className="whitespace-nowrap px-6 py-4 text-right text-sm">
-										<span className="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800">
-											{stat.total_books_read} видач
-										</span>
-									</td>
-									<td className="whitespace-nowrap px-6 py-4 text-right text-sm text-slate-600">
-										{(stat.avg_reading_duration_days ?? 0).toFixed(1)} днів
-									</td>
-								</tr>
-							))
-						)}
+					<tbody className="divide-y divide-slate-100">
+					{stats?.map((stat, index) => (
+						<tr key={index}>
+							<td className="px-6 py-4 font-medium text-slate-900">{stat.fullname}</td>
+							<td className="px-6 py-4 text-center">{stat.total_loans}</td>
+							<td className="px-6 py-4 text-right font-medium text-indigo-600">
+								{stat.avg_reading_duration}
+							</td>
+						</tr>
+					))}
 					</tbody>
 				</table>
 			</div>
